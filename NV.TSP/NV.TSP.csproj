@@ -50,14 +50,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NV.TSP.Business\NV.TSP.Business.csproj">
-      <Project>{7094439d-ee69-4e3f-8bcd-ff64cb9b5827}</Project>
-      <Name>NV.TSP.Business</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NV.TSP.Entities\NV.TSP.Entities.csproj">
-      <Project>{fd293232-c293-4499-b678-c4c560fef17a}</Project>
-      <Name>NV.TSP.Entities</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NV.TSP.Presentation\NV.TSP.Presentation.csproj">
       <Project>{9af17c28-54dc-4233-beb1-151d601ca6e1}</Project>
       <Name>NV.TSP.Presentation</Name>

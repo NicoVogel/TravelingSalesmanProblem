@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities;
+using TSP.Entities.Math;
+using TSP.Entities.Interfaces.Business;
 using TSP.Entities.Interfaces.Presentation;
 using TSP.DataAccess;
 
@@ -13,6 +15,7 @@ namespace TSP.Business
     public class MapController
     {
         private IWindowObserver m_winObs;
+        private IMathHelper m_math = new MathHelper();
         private FileManager m_fileMgr;
         private Random m_rnd;
 
@@ -51,6 +54,20 @@ namespace TSP.Business
             get { return m_winObs; }
             private set { m_winObs = value; }
         }
+        /// <summary>
+        /// Public accessor
+        /// </summary>
+        public IMathHelper Math
+        {
+            get
+            {
+                if (m_math == null)
+                    m_math = new MathHelper();
+                return m_math;
+            }
+            private set { m_math = value; }
+        }
+
 
         #endregion
 
@@ -196,7 +213,7 @@ namespace TSP.Business
                 foreach (var p in clonePoints)
                 {
                     // suche nach dem punkt der am naechsten zu "current" ist.
-                    var d = MathHelper.GetDistance(current, p);
+                    var d = Math.GetDistance(current, p);
                     if (next == null || distance > d)
                     {
                         distance = d;
@@ -260,7 +277,7 @@ namespace TSP.Business
 
         #endregion
 
-        
+
 
         /// <summary>
         /// Pruefe ob ein rundlauf entstanden ist und dadurch nicht mehr alle punkte angesteuert werden

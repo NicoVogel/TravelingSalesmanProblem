@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Map - Copy.cs" />
     <Compile Include="Math\MathExtensions.cs" />
     <Compile Include="Interfaces\Business\IMapController.cs" />
     <Compile Include="Interfaces\Business\IMathHelper.cs" />

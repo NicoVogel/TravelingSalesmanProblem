@@ -8,12 +8,14 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
 
-        <Canvas HorizontalAlignment="Left" Height="320" Margin="143,0,0,0" VerticalAlignment="Top" Width="374"/>
-        <Button x:Name="btnRun" Content="Run" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Click="btnRun_Click"/>
-        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="90"/>
-        <TreeView x:Name="tvwContent" HorizontalAlignment="Left" Margin="10,106,0,10" Width="128"/>
-        <RadioButton x:Name="rdiBest" Content="Show Best" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Width="90"/>
-        <RadioButton x:Name="rdiShort" Content="Show Short" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="90"/>
+        <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="320" Margin="143,0,0,0" VerticalAlignment="Top" Width="374"/>
+        <Button x:Name="btnRun" Content="Run" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="90" Click="btnRun_Click"/>
+        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Width="90" Click="btnStop_Click"/>
+        <TreeView x:Name="tvwContent" HorizontalAlignment="Left" Margin="10,150,0,10" Width="128"/>
+        <RadioButton x:Name="rdiBest" Content="Show Best" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Width="90"/>
+        <RadioButton x:Name="rdiShort" Content="Show Short" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Width="90"/>
+        <Button x:Name="btnLoad" Content="Load" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Click="btnLoad_Click"/>
+        <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="90" Click="btnSave_Click"/>
 
 
     </Grid>
