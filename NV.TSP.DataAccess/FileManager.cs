@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 using TSP.Entities;
 
-namespace TSP
+namespace TSP.DataAccess
 {
     /// <summary>
     /// Ist zustaendig eine Datei zu laden oder zu speichern

@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities;
+using TSP.Entities.Interfaces.Business;
 
-namespace TSP
+namespace TSP.Business.Math
 {
     /// <summary>
     /// Diese Klasse uebernimmt die rechnungen
     /// </summary>
-    public static class MathHelper
+    public static class MathHelper : IMathHelper
     {
         #region Const
 

@@ -9,7 +9,7 @@ namespace TSP.Entities
     /// <summary>
     /// Diese Klasse ist nur als container gedacht.
     /// </summary>
-    public class Line : ICloneable
+    public class Line
     {
         private Point m_p1;
         private Point m_p2;
@@ -33,13 +33,6 @@ namespace TSP.Entities
             get { return m_p1; }
             set { m_p1 = value; }
         }
-        /// <summary>
-        /// Die Laenge der linie
-        /// </summary>
-        public double Distance
-        {
-            get { return MathHelper.GetDistance(this); }
-        }
 
 
         #endregion
@@ -50,20 +43,14 @@ namespace TSP.Entities
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
-        public Line(Point a, Point b)
+        public Line(Point a, Point b) : this()
         {
             A = a;
             B = b;
         }
 
-        public Line()
-        {
+        public Line() { }
 
-        }
 
-        public object Clone()
-        {
-            return new Line(A, B);
-        }
     }
 }

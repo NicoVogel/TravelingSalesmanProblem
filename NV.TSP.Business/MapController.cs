@@ -5,15 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities;
+using TSP.Entities.Interfaces.Presentation;
+using TSP.DataAccess;
 
-namespace TSP
+namespace TSP.Business
 {
     public class MapController
     {
-        private Map m_bestMap;
-        private Map m_shortMap;
-        private Map m_curMap;
-        private Log m_curlog;
+        private IWindowObserver m_winObs;
         private FileManager m_fileMgr;
         private Random m_rnd;
 
@@ -21,58 +20,6 @@ namespace TSP
         #region Properties
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Log CurrentLog
-        {
-            get
-            {
-                if (m_curlog == null)
-                    m_curlog = new Log();
-                return m_curlog;
-            }
-            set { m_curlog = value; }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Map CurrentMap
-        {
-            get
-            {
-                if (m_curMap == null)
-                    m_curMap = new Map(BestMap);
-                return m_curMap;
-            }
-            set { m_curMap = value; }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Map BestMap
-        {
-            get
-            {
-                if (m_bestMap == null)
-                    m_bestMap = new Map();
-                return m_bestMap;
-            }
-            set { m_bestMap = value; }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Map ShortestMap
-        {
-            get
-            {
-                if (m_shortMap == null)
-                    m_shortMap = new Map();
-                return m_shortMap;
-            }
-            set { m_shortMap = value; }
-        }
         /// <summary>
         /// Public accessor fuer den File Manager
         /// </summary>
@@ -86,20 +33,32 @@ namespace TSP
             }
             private set { m_fileMgr = value; }
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public string EmptyLine
         {
             get
             {
-                return "\r" + new string(' ', Console.BufferWidth-1) + "\r";
+                return "\r" + new string(' ', Console.BufferWidth - 1) + "\r";
             }
+        }
+        /// <summary>
+        /// Public accessor
+        /// </summary>
+        public IWindowObserver WinObs
+        {
+            get { return m_winObs; }
+            private set { m_winObs = value; }
         }
 
         #endregion
 
 
-        public MapController()
+        public MapController(IWindowObserver winObs)
         {
             m_rnd = new Random();
+            WinObs = winObs;
         }
 
 
@@ -110,12 +69,19 @@ namespace TSP
         public void Process(int etheration = 1)
         {
             int count = 0;
+            Map best = null;
+            Map bestCopy = null;
+            Map shortest = null;
             for (int i = 0; i < etheration; i++)
             {
+                best = WinObs.BestMap;
+                bestCopy = best.Clone();
+                shortest = WinObs.ShortestMap;
+
                 count++;
                 int swapCount = 1;
-                CurrentLog.Age++;
-                Console.Write(EmptyLine + CurrentLog.Text + "\t" + i + "/" + etheration);
+                WinObs.CurrentAge++;
+                Console.Write(EmptyLine + WinObs.CurrentLog.Text + "\t" + i + "/" + etheration);
 
                 switch (count)
                 {
@@ -137,24 +103,24 @@ namespace TSP
                         break;
                 }
                 for (int k = 0; k < swapCount; k++)
-                    singleSwap(CurrentMap);
+                    singleSwap(bestCopy);
 
 
-                if (CurrentMap.Fitness < BestMap.Fitness)
+                if (bestCopy.Fitness < best.Fitness)
                 {
-                    newBest();
+                    WinObs.NewBest(bestCopy);
+                    Console.WriteLine(EmptyLine + WinObs.CurrentLog.Text);
                     count = 0;
                 }
                 else
                 {
-                    CurrentLog.Fitness = CurrentMap.Fitness;
-                    CurrentLog.Distance = CurrentMap.Distance;
-                    CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
-                    CurrentMap = new Map(BestMap);
+                    WinObs.CurrentLog.Fitness = bestCopy.Fitness;
+                    WinObs.CurrentLog.Distance = bestCopy.Distance;
+                    WinObs.CurrentLog.Intersections = bestCopy.GetIntersectionAmount();
                 }
-                if(CurrentMap.Distance < ShortestMap.Distance)
+                if (bestCopy.Distance < WinObs.ShortestMap.Distance)
                 {
-                    ShortestMap = new Map(CurrentMap);
+                    WinObs.NewShortest(bestCopy);
                 }
             }
         }
@@ -169,17 +135,22 @@ namespace TSP
         /// <param name="path"></param>
         public void ReadPoints(string path)
         {
-            CurrentMap = new Map();
 
-            CurrentMap.Points = FileMgr.LoadPoints(path);
-            CurrentMap.Lines = firstConnection(CurrentMap.Points);
-            CurrentMap.Generation = 1;
-            CurrentMap.Logs.Add(new Log(CurrentMap.Generation, 0, CurrentMap.Fitness, CurrentMap.Distance));
-            CurrentMap.Logs.First().Intersections = CurrentMap.GetIntersectionAmount();
-            Console.WriteLine(EmptyLine + CurrentMap.Logs.First().Text);
-            CurrentLog = new Log(CurrentMap.Generation + 1, 0, CurrentMap.Fitness, CurrentMap.Distance);
-            CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
-            BestMap = new Map(CurrentMap);
+
+            var points = FileMgr.LoadPoints(path);
+            var lines = firstConnection(points);
+
+            WinObs.LoadPoints(points, lines);
+
+
+            //CurrentMap.Generation = 1;
+            //CurrentMap.Logs.Add(new Log(CurrentMap.Generation, 0, CurrentMap.Fitness, CurrentMap.Distance));
+            //CurrentMap.Logs.First().Intersections = CurrentMap.GetIntersectionAmount();
+            //Console.WriteLine(EmptyLine + CurrentMap.Logs.First().Text);
+            //CurrentLog = new Log(CurrentMap.Generation + 1, 0, CurrentMap.Fitness, CurrentMap.Distance);
+            //CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
+            //BestMap = new Map(CurrentMap);
+
         }
         /// <summary>
         /// Speicher die momentan beste karte
@@ -187,8 +158,7 @@ namespace TSP
         /// <param name="path"></param>
         public void SaveMap(string path)
         {
-            var entity = new SaveEntity(BestMap, ShortestMap);
-            FileMgr.SaveMap(entity, path);
+            FileMgr.SaveMap(WinObs.Values, path);
         }
         /// <summary>
         /// Lade eine Karte und ueberschreibe die momentanen Informationen
@@ -196,21 +166,7 @@ namespace TSP
         /// <param name="path"></param>
         public void LoadMap(string path)
         {
-            var read = FileMgr.LoadMap(path);
-            CurrentMap = read.BestMap;
-            ShortestMap = read.ShortestMap;
-            //foreach (var p in CurrentMap.Points)
-            //{
-            //    var line1 = CurrentMap.Lines.Where(x => x.A.Index == p.Index).FirstOrDefault();
-            //    if (line1 != null)
-            //        line1.A = p;
-            //    var line2 = CurrentMap.Lines.Where(x => x.B.Index == p.Index).FirstOrDefault();
-            //    if (line2 != null)
-            //        line2.B = p;
-            //}
-            Console.WriteLine(EmptyLine + CurrentMap.Logs.Last().Text);
-            BestMap = new Map(CurrentMap);
-            CurrentLog = new Log(CurrentMap.Generation + 1, 0);
+            WinObs.Values = FileMgr.LoadMap(path);
         }
 
 
@@ -304,22 +260,7 @@ namespace TSP
 
         #endregion
 
-
-
-        private void newBest()
-        {
-            CurrentLog.Distance = CurrentMap.Distance;
-            CurrentLog.Fitness = CurrentMap.Fitness;
-            CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
-            CurrentMap.Logs.Add(CurrentLog);
-            CurrentMap.Generation = CurrentLog.Generation;
-            BestMap = new Map(CurrentMap);
-
-            Console.WriteLine(EmptyLine + CurrentLog.Text);
-            CurrentLog = new Log(CurrentMap.Generation + 1, 0, CurrentMap.Fitness, CurrentMap.Distance);
-            CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
-        }
-
+        
 
         /// <summary>
         /// Pruefe ob ein rundlauf entstanden ist und dadurch nicht mehr alle punkte angesteuert werden

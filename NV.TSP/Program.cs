@@ -14,10 +14,10 @@ namespace TSP
 
             int width = Console.WindowWidth + 40;
             Console.SetWindowSize(width, Console.WindowHeight);
-            mc.ReadPoints(@"E:\temp\att532.txt");
-            mc.LoadMap(@"E:\temp\test4.xml");
-            mc.Process(1000000);
-            mc.SaveMap(@"E:\temp\test4.xml");
+            mc.ReadPoints(@"C:\temp\att532.txt");
+            //mc.LoadMap(@"E:\temp\test4.xml");
+            mc.Process(1000);
+            mc.SaveMap(@"C:\temp\test1.xml");
 
             ////mc.ReadPoints(@"E:\temp\smalTest.txt");
             //mc.LoadMap(@"E:\temp\smalResult.xml");

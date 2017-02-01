@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9CCECFFB-E320-464D-819B-D64C94B5BF12}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{A0313A81-21A7-483E-A773-AC488810505C}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TSP</RootNamespace>
-    <AssemblyName>TSP</AssemblyName>
+    <RootNamespace>TSP.Entities.Interfaces</RootNamespace>
+    <AssemblyName>TSP.Entities.Interfaces</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,24 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Business\IMapController.cs" />
+    <Compile Include="Business\IMathHelper.cs" />
+    <Compile Include="Presentation\IWindowObserver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NV.TSP.Business\NV.TSP.Business.csproj">
-      <Project>{7094439d-ee69-4e3f-8bcd-ff64cb9b5827}</Project>
-      <Name>NV.TSP.Business</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NV.TSP.Entities\NV.TSP.Entities.csproj">
       <Project>{fd293232-c293-4499-b678-c4c560fef17a}</Project>
       <Name>NV.TSP.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NV.TSP.Presentation\NV.TSP.Presentation.csproj">
-      <Project>{9af17c28-54dc-4233-beb1-151d601ca6e1}</Project>
-      <Name>NV.TSP.Presentation</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
