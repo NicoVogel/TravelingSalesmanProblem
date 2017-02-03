@@ -6,18 +6,10 @@ using System.Threading.Tasks;
 
 using TSP.Entities;
 
-namespace TSP.Entities.Interfaces.Presentation
+namespace TSP.Interfaces.Business
 {
-    public interface IWindowObserver
+    public interface IValueShare
     {
-        /// <summary>
-        /// Load or save the current state through a <see cref="SaveEntity"/>
-        /// </summary>
-        SaveEntity Values
-        {
-            get;
-            set;
-        }
         /// <summary>
         /// public accessor
         /// </summary>
@@ -51,11 +43,5 @@ namespace TSP.Entities.Interfaces.Presentation
         /// </summary>
         /// <param name="m"></param>
         void NewShortest(Map m);
-        /// <summary>
-        /// load the points from a file and create the start entities
-        /// </summary>
-        /// <param name="points"></param>
-        /// <param name="lines"></param>
-        void LoadPoints(List<Point> points, List<Line> lines);
     }
 }

@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -39,15 +40,26 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Controls\TspCanvas.cs" />
+    <Compile Include="Entities\Controls\TspTreeView.cs" />
+    <Compile Include="Entities\Controls\TspTreeViewItem.cs" />
+    <Compile Include="Exceptions\DiagnosticEvents.cs" />
+    <Compile Include="Entities\Data\MapFile.cs" />
+    <Compile Include="Enums\MutationType.cs" />
+    <Compile Include="Exceptions\TspException.cs" />
+    <Compile Include="Exceptions\TspDataException.cs" />
+    <Compile Include="Interfaces\Data\IFileManager.cs" />
     <Compile Include="Interfaces\Presentation\IMainWindow.cs" />
-    <Compile Include="Interfaces\Presentation\IPresentationController.cs" />
+    <Compile Include="Interfaces\Business\IPresentationController.cs" />
     <Compile Include="Interfaces\Presentation\ITspCanvas.cs" />
+    <Compile Include="Interfaces\Presentation\ITspTreeView.cs" />
     <Compile Include="Math\MathExtensions.cs" />
     <Compile Include="Interfaces\Business\IMapController.cs" />
     <Compile Include="Interfaces\Business\IMathHelper.cs" />
-    <Compile Include="Interfaces\Presentation\IWindowObserver.cs" />
+    <Compile Include="Interfaces\Business\IValueShare.cs" />
     <Compile Include="Entities\Line.cs" />
     <Compile Include="Entities\Log.cs" />
     <Compile Include="Entities\Map.cs" />
@@ -55,9 +67,17 @@
     <Compile Include="Entities\Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\SaveEntity.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Enums\" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using TSP.Entities;
 
-namespace TSP.Entities.Interfaces.Business
+namespace TSP.Interfaces.Business
 {
     public interface IMathHelper
     {

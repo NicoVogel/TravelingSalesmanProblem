@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities.Math;
-using TSP.Entities.Interfaces.Business;
+using TSP.Interfaces.Business;
 
 namespace TSP.Entities
 {
@@ -82,6 +82,55 @@ namespace TSP.Entities
             }
             return intersections;
         }
+
+
+        /// <summary>
+        /// Erstellt die verbindung anhand von der entfernung der einzelnen punkten
+        /// </summary>
+        /// <param name="map"></param>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static Map FirstConnection(this Map map, List<Point> points)
+        {
+            var lines = map.Lines;
+            // klone die liste damit man diese schrumpfen lassen kann
+            var clonePoints = new List<Point>(points);
+            // der erste muss festgehalten werden, damit man diesen als endpunkt nutzen kann
+            var first = clonePoints.First();
+            var current = first;
+            clonePoints.Remove(first);
+            do
+            {
+                Point next = null;
+                double distance = 0;
+                foreach (var p in clonePoints)
+                {
+                    // suche nach dem punkt der am naechsten zu "current" ist.
+                    var d = m_math.GetDistance(current, p);
+                    if (next == null || distance > d)
+                    {
+                        distance = d;
+                        next = p;
+                    }
+                }
+                if (next != null)
+                {
+                    // wenn man einen gefunden hat wird eine linie hinzugefuegt
+                    // danach wir next der neue current und dieser punkt verschwindet aus der liste
+                    lines.Add(new Line(current, next));
+                    current = next;
+                    clonePoints.Remove(next);
+                }
+                else
+                {
+                    // wenn man keinen mehr findet, dann muss nur noch der letzte mit dem ersten punkt verbunden werden
+                    lines.Add(new Line(current, first));
+                    break;
+                }
+            } while (clonePoints.Count >= 0);
+            return map;
+        }
+
 
         #endregion
 

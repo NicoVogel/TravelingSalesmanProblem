@@ -5,18 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 
-namespace TSP.Presentation
+using TSP.Interfaces.Presentation;
+
+
+namespace TSP.Entities.Controls
 {
-    public class TspCanvas : Canvas, TSP.Entities.Interfaces.Presentation.ITspCanvas
+    public class TspCanvas : Canvas, ITspCanvas
     {
         private double m_defaultScale = 0.1;
         public const int m_defaultPointSize = 5;
 
-        private Dictionary<TSP.Entities.Point, Ellipse> m_points;
-        private Dictionary<TSP.Entities.Line, Line> m_lines;
+        private Dictionary<TSP.Entities.Point, System.Windows.Shapes.Ellipse> m_points;
+        private Dictionary<TSP.Entities.Line, System.Windows.Shapes.Line> m_lines;
         private double m_scale;
         private int m_pointSize;
 
@@ -32,12 +34,12 @@ namespace TSP.Presentation
         /// Contains the relation between the entity points and the displayed points.
         /// <para>Should only be used to read and not to edit</para>
         /// </summary>
-        public Dictionary<TSP.Entities.Point, Ellipse> Points
+        public Dictionary<TSP.Entities.Point, System.Windows.Shapes.Ellipse> Points
         {
             get
             {
                 if (m_points == null)
-                    m_points = new Dictionary<TSP.Entities.Point, Ellipse>();
+                    m_points = new Dictionary<TSP.Entities.Point, System.Windows.Shapes.Ellipse>();
                 return m_points;
             }
             private set { m_points = value; }
@@ -46,12 +48,12 @@ namespace TSP.Presentation
         /// Contains the relation between the entity line and the displayed line.
         /// <para>Should only be used to read and notn to edit</para>
         /// </summary>
-        public Dictionary<TSP.Entities.Line, Line> Lines
+        public Dictionary<TSP.Entities.Line, System.Windows.Shapes.Line> Lines
         {
             get
             {
                 if (m_lines == null)
-                    m_lines = new Dictionary<TSP.Entities.Line, Line>();
+                    m_lines = new Dictionary<TSP.Entities.Line, System.Windows.Shapes.Line>();
                 return m_lines;
             }
             private set { m_lines = value; }
@@ -96,6 +98,14 @@ namespace TSP.Presentation
             }
         }
 
+        Dictionary<Line, System.Windows.Shapes.Line> ITspCanvas.Lines
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
 
         #endregion
 
@@ -118,7 +128,7 @@ namespace TSP.Presentation
         {
             this.Dispatcher.Invoke(() =>
             {
-                var e = new Ellipse();
+                var e = new System.Windows.Shapes.Ellipse();
                 e.Width = PointSize;
                 e.Height = PointSize;
                 e.StrokeThickness = 0;
@@ -218,7 +228,7 @@ namespace TSP.Presentation
         #region Private Methods
 
 
-        private void ellipsPosition(TSP.Entities.Point p, Ellipse e)
+        private void ellipsPosition(TSP.Entities.Point p, System.Windows.Shapes.Ellipse e)
         {
             double left = (p.X * Scale) - (PointSize / 2);
             double top = (p.Y * Scale) - (PointSize / 2);

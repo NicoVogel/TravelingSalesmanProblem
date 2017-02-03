@@ -58,7 +58,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="TspCanvas.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -67,14 +66,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="LineCollection.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PresentationController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -109,10 +106,6 @@
     <ProjectReference Include="..\NV.TSP.Entities\NV.TSP.Entities.csproj">
       <Project>{fd293232-c293-4499-b678-c4c560fef17a}</Project>
       <Name>NV.TSP.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NV.TSP\NV.TSP.csproj">
-      <Project>{9ccecffb-e320-464d-819b-d64c94b5bf12}</Project>
-      <Name>NV.TSP</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

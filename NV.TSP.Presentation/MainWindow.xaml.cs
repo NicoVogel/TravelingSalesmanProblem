@@ -14,9 +14,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-
-using TSP.Entities.Interfaces.Presentation;
-
+using TSP.Business;
+using TSP.Entities.Controls;
+using TSP.Interfaces.Business;
+using TSP.Interfaces.Presentation;
 
 namespace TSP.Presentation
 {
@@ -96,6 +97,8 @@ namespace TSP.Presentation
             InitializeComponent();
             int width = Console.WindowWidth + 40;
             Console.SetWindowSize(width, Console.WindowHeight);
+
+            this.rdiShort.IsChecked = true;
         }
 
 
@@ -107,6 +110,7 @@ namespace TSP.Presentation
             try
             {
                 var ofd = new OpenFileDialog();
+                ofd.Filter = "Text Files (*.txt)|*" + PC.PointExtension;
                 if (ofd.ShowDialog() == true)
                 {
                     PC.LoadFilePoints(ofd.FileName);
@@ -123,6 +127,7 @@ namespace TSP.Presentation
             try
             {
                 var ofd = new OpenFileDialog();
+                ofd.Filter = "Map Files (*.map)|*" + PC.MapExtension;
                 if (ofd.ShowDialog() == true)
                 {
                     PC.LoadFileMap(ofd.FileName);
@@ -139,6 +144,7 @@ namespace TSP.Presentation
             try
             {
                 var sfd = new SaveFileDialog();
+                sfd.Filter = "Map Files (*.map)|*" + PC.MapExtension;
                 if (sfd.ShowDialog() == true)
                     PC.SaveFile(sfd.FileName);
             }
@@ -170,6 +176,17 @@ namespace TSP.Presentation
             {
                 handleException(ex);
             }
+        }
+        
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // check if process is still running
+            // ask for saving befor closing
         }
 
 

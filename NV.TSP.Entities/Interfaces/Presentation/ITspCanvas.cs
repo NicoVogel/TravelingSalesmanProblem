@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
 
-namespace TSP.Entities.Interfaces.Presentation
+using TSP.Entities;
+
+namespace TSP.Interfaces.Presentation
 {
     public interface ITspCanvas
     {
@@ -32,7 +34,7 @@ namespace TSP.Entities.Interfaces.Presentation
         /// Contains the relation between the entity line and the displayed line.
         /// <para>Should only be used to read and notn to edit</para>
         /// </summary>
-        Dictionary<Line, System.Windows.Shapes.Line> Lines { get; }
+        Dictionary<TSP.Entities.Line, System.Windows.Shapes.Line> Lines { get; }
         /// <summary>
         /// the scale that is multiplied with the coordinates
         /// <para>by updating the scale all coordinates get updated as well</para>
@@ -67,12 +69,12 @@ namespace TSP.Entities.Interfaces.Presentation
         /// Draw a line and create a relation
         /// </summary>
         /// <param name="l"></param>
-        void DrawLine(Line l);
+        void DrawLine(TSP.Entities.Line l);
         /// <summary>
         /// Remove a line and the relation
         /// </summary>
         /// <param name="l"></param>
-        void RemoveLine(Line l);
+        void RemoveLine(TSP.Entities.Line l);
         /// <summary>
         /// Remove all lines from the canvas
         /// </summary>

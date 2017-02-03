@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 using TSP.Entities;
 using TSP.Entities.Math;
-using TSP.Entities.Interfaces.Business;
-using TSP.Entities.Interfaces.Presentation;
+using TSP.Interfaces.Business;
+using TSP.Interfaces.Presentation;
 using TSP.DataAccess;
 
 namespace TSP.Business
 {
     public class MapController : IMapController
     {
-        private IWindowObserver m_winObs;
-        private IMathHelper m_math = new MathHelper();
-        private FileManager m_fileMgr;
+        private IValueShare m_winObs;
         private Random m_rnd;
         private bool m_stopProcess;
 
@@ -33,19 +31,6 @@ namespace TSP.Business
             set { m_stopProcess = value; }
         }
         /// <summary>
-        /// Public accessor fuer den File Manager
-        /// </summary>
-        public FileManager FileMgr
-        {
-            get
-            {
-                if (m_fileMgr == null)
-                    m_fileMgr = new FileManager();
-                return m_fileMgr;
-            }
-            private set { m_fileMgr = value; }
-        }
-        /// <summary>
         /// 
         /// </summary>
         public string EmptyLine
@@ -58,98 +43,23 @@ namespace TSP.Business
         /// <summary>
         /// Public accessor
         /// </summary>
-        public IWindowObserver WinObs
+        public IValueShare WinObs
         {
             get { return m_winObs; }
             private set { m_winObs = value; }
-        }
-        /// <summary>
-        /// Public accessor
-        /// </summary>
-        public IMathHelper Math
-        {
-            get
-            {
-                if (m_math == null)
-                    m_math = new MathHelper();
-                return m_math;
-            }
-            private set { m_math = value; }
         }
 
 
         #endregion
 
 
-        public MapController(IWindowObserver winObs)
+        public MapController(IValueShare winObs)
         {
             m_rnd = new Random();
             WinObs = winObs;
         }
+        
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="etheration"></param>
-        public void OldProcess(int etheration = 1)
-        {
-            int count = 0;
-            Map best = null;
-            Map bestCopy = null;
-            Map shortest = null;
-            for (int i = 0; i < etheration; i++)
-            {
-                best = WinObs.BestMap;
-                bestCopy = best.Clone();
-                shortest = WinObs.ShortestMap;
-
-                count++;
-                int swapCount = 1;
-                WinObs.CurrentAge++;
-                Console.Write(EmptyLine + WinObs.CurrentLog.Text + "\t" + i + "/" + etheration);
-
-                switch (count)
-                {
-                    case 10:
-                    case 20:
-                    case 30:
-                    case 40:
-                    case 60:
-                    case 70:
-                    case 80:
-                    case 90:
-                        swapCount = 2;
-                        break;
-                    case 50:
-                        swapCount = 4;
-                        count = 0;
-                        break;
-                    default:
-                        break;
-                }
-                for (int k = 0; k < swapCount; k++)
-                    singleSwap(bestCopy);
-
-
-                if (bestCopy.Fitness < best.Fitness)
-                {
-                    WinObs.NewBest(bestCopy);
-                    Console.WriteLine(EmptyLine + WinObs.CurrentLog.Text);
-                    count = 0;
-                }
-                else
-                {
-                    WinObs.CurrentLog.Fitness = bestCopy.Fitness;
-                    WinObs.CurrentLog.Distance = bestCopy.Distance;
-                    WinObs.CurrentLog.Intersections = bestCopy.GetIntersectionAmount();
-                }
-                if (bestCopy.Distance < WinObs.ShortestMap.Distance)
-                {
-                    WinObs.NewShortest(bestCopy);
-                }
-            }
-        }
         /// <summary>
         /// 
         /// </summary>
@@ -212,92 +122,10 @@ namespace TSP.Business
                 }
             }
         }
-
-        #region IO
-
-
-        /// <summary>
-        /// Liesst punklte aus einer Datei. Diese ueberschreiben die momentanen Informationen
-        /// </summary>
-        /// <param name="path"></param>
-        public void ReadPoints(string path)
-        {
-            var points = FileMgr.LoadPoints(path);
-            var lines = firstConnection(points);
-
-            WinObs.LoadPoints(points, lines);
-        }
-        /// <summary>
-        /// Speicher die momentan beste karte
-        /// </summary>
-        /// <param name="path"></param>
-        public void SaveMap(string path)
-        {
-            FileMgr.SaveMap(WinObs.Values, path);
-        }
-        /// <summary>
-        /// Lade eine Karte und ueberschreibe die momentanen Informationen
-        /// </summary>
-        /// <param name="path"></param>
-        public void LoadMap(string path)
-        {
-            WinObs.Values = FileMgr.LoadMap(path);
-        }
-
-
-        #endregion
+        
 
         #region Mutation
 
-
-        /// <summary>
-        /// Erstellt die verbindung anhand von der entfernung der einzelnen punkten
-        /// </summary>
-        /// <param name="points"></param>
-        /// <returns></returns>
-        private List<Line> firstConnection(List<Point> points)
-        {
-            var lines = new List<Line>();
-            // klone die liste damit man diese schrumpfen lassen kann
-            var clonePoints = new List<Point>(points);
-            // der erste muss festgehalten werden, damit man diesen als endpunkt nutzen kann
-            var first = clonePoints.First();
-            var current = first;
-            clonePoints.Remove(first);
-            do
-            {
-                Point next = null;
-                double distance = 0;
-                foreach (var p in clonePoints)
-                {
-                    // suche nach dem punkt der am naechsten zu "current" ist.
-                    var d = Math.GetDistance(current, p);
-                    if (next == null || distance > d)
-                    {
-                        distance = d;
-                        next = p;
-                    }
-                }
-                if (next != null)
-                {
-                    // wenn man einen gefunden hat wird eine linie hinzugefuegt
-                    // danach wir next der neue current und dieser punkt verschwindet aus der liste
-                    lines.Add(new Line(current, next));
-                    current = next;
-                    clonePoints.Remove(next);
-                }
-                else
-                {
-                    // wenn man keinen mehr findet, dann muss nur noch der letzte mit dem ersten punkt verbunden werden
-                    lines.Add(new Line(current, first));
-                    break;
-                }
-
-
-            } while (clonePoints.Count >= 0);
-
-            return lines;
-        }
 
         /// <summary>
         /// Tausche zwei verbindungen
@@ -351,50 +179,68 @@ namespace TSP.Business
             do
             {
                 counter++;
-                Line firstChoice = null;
-                Line secondChoice = null;
-                var next = map.GetLineByPointA(pointB);
+                //Line firstChoice = null;
+                //Line secondChoice = null;
+                //var next = map.GetLineByPointA(pointB);
+
+
+                var next = map.GetLineByPoint(pointB);
                 Line nextLine = null;
 
-                if (next.Count == 0)
+
+                if (next.Count == 2)
                 {
-                    next = map.GetLineByPointB(pointB);
-                    if (next.Count == 2)
-                    {
-                        firstChoice = next[0];
-                        secondChoice = next[1];
-                    }
+                    if (next[0] == lastLine)
+                        nextLine = next[1];
+                    else if (next[1] == lastLine)
+                        nextLine = next[0];
                     else
-                        throw new Exception("hasloop: line connection error. -> ByPointA == 0 /// ByPointB != 2");
-                }
-                else if (next.Count == 1)
-                {
-                    firstChoice = next[0];
-                    var second = map.GetLineByPointB(pointB);
-                    if (second != null && second.Count == 1)
-                    {
-                        secondChoice = second[0];
-                    }
-                    else
-                        throw new Exception("hasloop: line connection error. -> firstChoice is set /// ByPointB == null or !=1");
-                }
-                else if(next.Count == 2)
-                {
-                    firstChoice = next[0];
-                    secondChoice = next[1];
+                        throw new Exception("hasloop: line connection error. -> 'firstChoice' and 'secondChoice' are not equal to 'lastLine'");
                 }
                 else
                 {
                     throw new Exception("hasloop: line connection error. -> next.count = " + next.Count + " is not allowed to be grather than 2.");
                 }
 
+                //if (next.Count == 0)
+                //{
+                //    next = map.GetLineByPointB(pointB);
+                //    if (next.Count == 2)
+                //    {
+                //        firstChoice = next[0];
+                //        secondChoice = next[1];
+                //    }
+                //    else
+                //        throw new Exception("hasloop: line connection error. -> ByPointA == 0 /// ByPointB != 2");
+                //}
+                //else if (next.Count == 1)
+                //{
+                //    firstChoice = next[0];
+                //    var second = map.GetLineByPointB(pointB);
+                //    if (second != null && second.Count == 1)
+                //    {
+                //        secondChoice = second[0];
+                //    }
+                //    else
+                //        throw new Exception("hasloop: line connection error. -> firstChoice is set /// ByPointB == null or !=1");
+                //}
+                //else if(next.Count == 2)
+                //{
+                //    firstChoice = next[0];
+                //    secondChoice = next[1];
+                //}
+                //else
+                //{
+                //    throw new Exception("hasloop: line connection error. -> next.count = " + next.Count + " is not allowed to be grather than 2.");
+                //}
 
-                if (firstChoice == lastLine)
-                    nextLine = secondChoice;
-                else if (secondChoice == lastLine)
-                    nextLine = firstChoice;
-                else
-                    throw new Exception("hasloop: line connection error. -> 'firstChoice' and 'secondChoice' are not equal to 'lastLine'");
+
+                //if (firstChoice == lastLine)
+                //    nextLine = secondChoice;
+                //else if (secondChoice == lastLine)
+                //    nextLine = firstChoice;
+                //else
+                //    throw new Exception("hasloop: line connection error. -> 'firstChoice' and 'secondChoice' are not equal to 'lastLine'");
 
                 lastLine = nextLine;
 
@@ -405,16 +251,7 @@ namespace TSP.Business
                 else
                     throw new Exception("hasloop: line connection error. -> the decided next line does not contain 'pointB'");
 
-
-
-                //var next = map.GetLineByPointA(pointB);
-                //if (next == null)
-                //    pointB = map.GetLineByPointB(pointB).A;
-                //else if (next.B == pointB)
-                //    pointB = map.GetLineByPointB(pointB).A;
-                //else
-                //    pointB = next.B;
-
+                
                 if (counter == map.Lines.Count + 10)
                     throw new Exception("Something is wrong");
             } while (pointB != startPoint);

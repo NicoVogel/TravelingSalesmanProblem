@@ -5,32 +5,49 @@ using System.Text;
 using System.Threading;
 
 
-using TSP.Business;
 using TSP.Entities;
-using TSP.Entities.Interfaces.Business;
-using TSP.Entities.Interfaces.Presentation;
+using TSP.Entities.Data;
+using TSP.Interfaces.Business;
+using TSP.Interfaces.Presentation;
+using TSP.Interfaces.Data;
+using TSP.DataAccess;
 
 
-namespace TSP.Presentation
+namespace TSP.Business
 {
     
 
-    public class PresentationController : IWindowObserver, IPresentationController
+    public class PresentationController : IValueShare, IPresentationController
     {
+        private List<Map> m_maps;
         private Map m_best;
-        private Map m_shotest;
+        private Map m_shortest;
         private List<Point> m_points;
         private List<Log> m_logs;
         private Log m_log;
         private int m_curAge;
         private IMapController m_mc;
         private IMainWindow m_main;
+        private IFileManager m_fileMgr;
         private Thread m_thread;
 
-        
+
         #region Properties
 
 
+        /// <summary>
+        /// Public accessor fuer den File Manager
+        /// </summary>
+        public IFileManager FileMgr
+        {
+            get
+            {
+                if (m_fileMgr == null)
+                    m_fileMgr = new FileManager();
+                return m_fileMgr;
+            }
+            private set { m_fileMgr = value; }
+        }
         /// <summary>
         /// public accessor
         /// </summary>
@@ -78,8 +95,36 @@ namespace TSP.Presentation
             }
             private set { m_logs = value; }
         }
+        /// <summary>
+        /// public accessor
+        /// </summary>
+        public List<Map> Maps
+        {
+            get
+            {
+                if (m_maps == null)
+                    m_maps = new List<Map>();
+                return m_maps;
+            }
+            private set { m_maps = value; }
+        }
 
 
+        #region PC Interface Properties
+
+        
+        /// <summary>
+        /// get the extesion for the map files
+        /// </summary>
+        public string MapExtension { get { return FileMgr.MapExtension; } }
+        /// <summary>
+        /// get the extsion for point files
+        /// </summary>
+        public string PointExtension { get { return FileMgr.PointExtension; } }
+
+
+        #endregion
+        
         #region Window Observer Interface Properties
 
 
@@ -104,30 +149,8 @@ namespace TSP.Presentation
         /// </summary>
         public Map ShortestMap
         {
-            get { return m_shotest; }
-            private set { m_shotest = value; }
-        }
-        /// <summary>
-        /// Load or save the current state through a <see cref="SaveEntity"/>
-        /// </summary>
-        public SaveEntity Values
-        {
-            get
-            {
-                return new SaveEntity(BestMap, ShortestMap, Logs, Points);
-            }
-            set
-            {
-                value.CorrectReferences();
-                BestMap = value.BestMap;
-                ShortestMap = value.ShortestMap;
-                Logs = value.Logs;
-                Points = value.Points;
-
-                // draw
-                drawPoints();
-                drawLines();
-            }
+            get { return m_shortest; }
+            private set { m_shortest = value; }
         }
         /// <summary>
         /// public accessor
@@ -151,7 +174,6 @@ namespace TSP.Presentation
         public PresentationController(IMainWindow m)
         {
             MainWind = m;
-
         }
 
 
@@ -174,6 +196,7 @@ namespace TSP.Presentation
             // override the generation number and clone the new best map
             m.Generation = CurrentLog.Generation;
             BestMap = m.Clone();
+            Maps.Add(BestMap);
 
             // create the new log
             CurrentLog = new Log(m.Generation + 1, 0, m.Fitness, m.Distance);
@@ -194,28 +217,11 @@ namespace TSP.Presentation
         public void NewShortest(Map m)
         {
             ShortestMap = m.Clone();
+            Maps.Add(ShortestMap);
 
             // draw
             if (MainWind.ShortestIsSelected)
                 drawLines();
-        }
-        /// <summary>
-        /// load the points from a file and create the start entities
-        /// </summary>
-        /// <param name="points"></param>
-        /// <param name="lines"></param>
-        public void LoadPoints(List<Point> points, List<Line> lines)
-        {
-            Points = points;
-            BestMap = new Map() { Lines = lines };
-            ShortestMap = BestMap.Clone();
-            CurrentLog = new Log(BestMap.Generation + 1, 0, BestMap.Fitness, BestMap.Distance);
-            Logs.Add(CurrentLog);
-            CurrentAge = 0;
-
-            // draw
-            drawPoints();
-            drawLines();
         }
 
 
@@ -226,20 +232,63 @@ namespace TSP.Presentation
         #region PC Interface Methods
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
         public void LoadFilePoints(string path)
         {
-            MC.ReadPoints(path);
+            Points = FileMgr.LoadPoints(path);
+            BestMap = new Map().FirstConnection(Points);
+            ShortestMap = BestMap.Clone();
+            CurrentLog = new Log(BestMap.Generation + 1, 0, BestMap.Fitness, BestMap.Distance);
+            Logs.Add(CurrentLog);
+            CurrentAge = 0;
+            Maps.Add(BestMap);
+            
+            Console.Clear();
+
+            // draw
+            drawPoints();
+            drawLines();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
         public void LoadFileMap(string path)
         {
-            MC.LoadMap(path);
-        }
+            var read = FileMgr.LoadFile(path);
+            Points = read.GetPoints();
+            Maps = read.GetMaps();
+            Logs = read.GetLogs();
 
+            BestMap = Maps.OrderByDescending(x => x.Fitness).FirstOrDefault();
+            ShortestMap = Maps.OrderByDescending(x => x.Distance).FirstOrDefault();
+
+            int nextGen = Maps.Max(x => x.Generation);
+            CurrentLog = new Log(nextGen, 0, BestMap.Fitness, BestMap.Distance);
+            CurrentAge = 0;
+
+            Console.Clear();
+
+            // draw
+            drawPoints();
+            drawLines();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
         public void SaveFile(string path)
         {
-            MC.SaveMap(path);
+            var mf = new MapFile();
+            mf.Fill(Maps, Logs, Points);
+            FileMgr.SaveFile(path, mf);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Run()
         {
             if (m_thread != null && m_thread.IsAlive)
@@ -250,7 +299,9 @@ namespace TSP.Presentation
                 m_thread.Start();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public void Stop()
         {
             if (m_thread != null && m_thread.IsAlive)

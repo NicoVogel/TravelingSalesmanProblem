@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities;
-using TSP.Entities.Interfaces.Business;
+using TSP.Interfaces.Business;
 
 namespace TSP.Entities.Math
 {
@@ -14,8 +14,11 @@ namespace TSP.Entities.Math
     /// </summary>
     public class MathHelper : IMathHelper
     {
-        #region Const
+        private double m_intersectionMultiplicator = 10;
+        private double m_distanceMultiplicator = 60;
 
+        #region Const
+        
 
         /// <summary>
         /// Diese Zahl wird mit der Schnitstellen anzahl multipliziert um einen groesseren einfluss auf die Fitness zu haben.
@@ -24,7 +27,7 @@ namespace TSP.Entities.Math
         {
             get
             {
-                return 10;
+                return m_intersectionMultiplicator;
             }
         }
         /// <summary>
@@ -34,9 +37,10 @@ namespace TSP.Entities.Math
         {
             get
             {
-                return 60;
+                return m_distanceMultiplicator;
             }
         }
+
 
         #endregion
 
@@ -175,10 +179,10 @@ namespace TSP.Entities.Math
                 int Cy = System.Math.Min(y3, y4);  // linie 2. der kleinere y wert
                 int Dy = System.Math.Max(y3, y4);  // linie 2. der groessere y wert
 
-                if (x >= Ax && x <= Bx &&   // zwischen Ax und Bx
-                    x >= Cx && x <= Dx &&   // zwischen Cx und Dx
-                    y >= Ay && y <= By &&   // zwischen Ay und By
-                    y >= Cy && y <= Dy)     // zwischen Cy und Dy
+                if (x > Ax && x < Bx &&   // zwischen Ax und Bx
+                    x > Cx && x < Dx &&   // zwischen Cx und Dx
+                    y > Ay && y < By &&   // zwischen Ay und By
+                    y > Cy && y < Dy)     // zwischen Cy und Dy
                     return true;
                 else
                     return false;
@@ -203,22 +207,10 @@ namespace TSP.Entities.Math
         public int GetFitness(int intersections, double distance, int pointCount)
         {
             //// weniger ist besser und 0 ist fertig (nicht erreibar)
-            //int fitness = 0;
-            //// wird benoetigt damit die intersections in einer relation zur laenge stehen,
-            //// sonst wuerden die schnittpunkte nicht einen aehnliche gewichtung bei verschiedenen punkten haben.
-            //double avgDistance = distance / pointCount;
-
-            //fitness = (int)(avgDistance * intersections * IntersectionMultiplicator);
-            //fitness += (int)(distance * DistanceMultiplicator / pointCount);
-            //return fitness;
-
             int fitness = 0;
             fitness = (int)(intersections * IntersectionMultiplicator);
             fitness += (int)(distance * DistanceMultiplicator / pointCount);
             return fitness;
-
-
-
         }
 
     }

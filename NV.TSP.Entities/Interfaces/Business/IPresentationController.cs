@@ -4,10 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TSP.Entities.Interfaces.Presentation
+namespace TSP.Interfaces.Business
 {
     public interface IPresentationController
     {
+
+        /// <summary>
+        /// get the extesion for the map files
+        /// </summary>
+        string MapExtension { get; }
+        /// <summary>
+        /// get the extsion for point files
+        /// </summary>
+        string PointExtension { get; }
+
         /// <summary>
         /// Load a file which conatins points
         /// </summary>
