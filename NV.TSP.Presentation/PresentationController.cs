@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 
 using TSP.Business;
 using TSP.Entities;
+using TSP.Entities.Interfaces.Business;
 using TSP.Entities.Interfaces.Presentation;
+
 
 namespace TSP.Presentation
 {
-    public class PresentationController : IWindowObserver
+    
+
+    public class PresentationController : IWindowObserver, IPresentationController
     {
         private Map m_best;
         private Map m_shotest;
@@ -19,17 +23,18 @@ namespace TSP.Presentation
         private List<Log> m_logs;
         private Log m_log;
         private int m_curAge;
-        private MapController m_mc;
-        private MainWindow m_main;
+        private IMapController m_mc;
+        private IMainWindow m_main;
+        private Thread m_thread;
 
-
+        
         #region Properties
 
 
         /// <summary>
         /// public accessor
         /// </summary>
-        public MapController MC
+        public IMapController MC
         {
             get
             {
@@ -42,14 +47,9 @@ namespace TSP.Presentation
         /// <summary>
         /// public accessor
         /// </summary>
-        public MainWindow MainWind
+        public IMainWindow MainWind
         {
-            get
-            {
-                if (m_main == null)
-                    m_main = new MainWindow();
-                return m_main;
-            }
+            get { return m_main; }
             private set { m_main = value; }
         }
         /// <summary>
@@ -144,14 +144,18 @@ namespace TSP.Presentation
         #endregion
 
 
-
-        public PresentationController()
+        /// <summary>
+        /// create new instance of <see cref="PresentationController"/>
+        /// </summary>
+        /// <param name="m"></param>
+        public PresentationController(IMainWindow m)
         {
-            MainWind.Show();
+            MainWind = m;
+
         }
 
 
-        #region Interface Methods
+        #region IWindowObserver Interface Methods
 
 
         /// <summary>
@@ -180,7 +184,7 @@ namespace TSP.Presentation
 
 
             // draw
-            if ((bool)MainWind.rdiBest.IsChecked)
+            if (MainWind.BestIsSelected)
                 drawLines();
         }
         /// <summary>
@@ -192,7 +196,7 @@ namespace TSP.Presentation
             ShortestMap = m.Clone();
 
             // draw
-            if ((bool)MainWind.rdiShort.IsChecked)
+            if (MainWind.ShortestIsSelected)
                 drawLines();
         }
         /// <summary>
@@ -218,22 +222,57 @@ namespace TSP.Presentation
         #endregion
 
 
+
+        #region PC Interface Methods
+
+
+        public void LoadFilePoints(string path)
+        {
+            MC.ReadPoints(path);
+        }
+        public void LoadFileMap(string path)
+        {
+            MC.LoadMap(path);
+        }
+
+        public void SaveFile(string path)
+        {
+            MC.SaveMap(path);
+        }
+
+        public void Run()
+        {
+            if (m_thread != null && m_thread.IsAlive)
+                throw new Exception("Der Prozess läuft schon");
+            else
+            {
+                m_thread = new Thread(MC.Process);
+                m_thread.Start();
+            }
+        }
+
+        public void Stop()
+        {
+            if (m_thread != null && m_thread.IsAlive)
+                MC.StopProcess = true;
+            else
+                throw new Exception("Der Prozess läuft gerade nicht");
+        }
+
+
+        #endregion
+
         private void drawPoints()
         {
             if (Points.Count > 0)
             {
                 // clear the old points
-                foreach (var p in MainWind.Points)
-                {
-                    MainWind.ObjCanvas.Children.Remove(p);
-                }
+                MainWind.TspCan.RemoveAllPoints();
 
                 // set the new points
                 foreach (var p in Points)
                 {
-                    var e = MainWind.CreatePoint(p);
-                    MainWind.Points.Add(e);
-                    MainWind.ObjCanvas.Children.Add(e);
+                    MainWind.TspCan.DrawPoint(p);
                 }
             }
         }
@@ -241,27 +280,22 @@ namespace TSP.Presentation
         private void drawLines()
         {
             List<Line> lines = null;
-            if ((bool)MainWind.rdiBest.IsChecked)
+            if (MainWind.BestIsSelected)
                 lines = BestMap.Lines;
-            else if((bool)MainWind.rdiShort.IsChecked)
+            else if (MainWind.ShortestIsSelected)
                 lines = ShortestMap.Lines;
 
             if (lines != null && lines.Count > 0)
+            {
+                // clear the old lines
+                MainWind.TspCan.RemoveAllLines();
+
+                // set the new line
+                foreach (var l in lines)
                 {
-                    // clear the old lines
-                    foreach (var l in MainWind.Lines.ShapeLines)
-                    {
-                        MainWind.ObjCanvas.Children.Remove(l);
-                    }
-
-                    // set the new line
-                    foreach (var l in lines)
-                    {
-                        MainWind.Lines.AddLine(l);
-                    }
+                    MainWind.TspCan.DrawLine(l);
                 }
+            }
         }
-
-
     }
 }

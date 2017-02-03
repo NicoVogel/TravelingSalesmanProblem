@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,51 +15,78 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 
+using TSP.Entities.Interfaces.Presentation;
+
 
 namespace TSP.Presentation
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IMainWindow
     {
-        LineCollection m_lines;
-        List<Ellipse> m_points;
+        private IPresentationController m_pc;
 
 
         #region Properties
 
 
         /// <summary>
-        /// Public accessor
+        /// public accessor
         /// </summary>
-        public LineCollection Lines
+        public IPresentationController PC
         {
             get
             {
-                if (m_lines == null)
-                    m_lines = new LineCollection(this.canvas);
-                return m_lines;
+                if (m_pc == null)
+                    m_pc = new PresentationController(this);
+                return m_pc;
             }
-            private set { m_lines = value; }
+            private set { m_pc = value; }
+        }
+
+
+        #region Interface Properties
+
+
+        /// <summary>
+        /// public accessor
+        /// </summary>
+        public ITspCanvas TspCan
+        {
+            get { return this.canvas; }
         }
         /// <summary>
-        /// Public accessor
+        /// get the checked value from the raidiobutton which is responsible for displaying the best map
         /// </summary>
-        public List<Ellipse> Points
+        public bool BestIsSelected
         {
             get
             {
-                if (m_points == null)
-                    m_points = new List<Ellipse>();
-                return m_points;
+                bool val = false;
+                this.Dispatcher.Invoke(()=>{
+                    val = this.rdiBest.IsChecked == null ? false : (bool)this.rdiBest.IsChecked;
+                });
+                return val;
             }
-            private set { m_points = value; }
         }
         /// <summary>
-        /// Public accessor
+        /// get the checked value from the raidiobutton which is responsible for displaying the shortest map
         /// </summary>
-        public Canvas ObjCanvas { get { return this.canvas; } }
+        public bool ShortestIsSelected
+        {
+            get
+            {
+                bool val = false;
+                this.Dispatcher.Invoke(() => {
+                    val = this.rdiShort.IsChecked == null ? false : (bool)this.rdiShort.IsChecked; ;
+                });
+                return val;
+            }
+        }
+
+
+        #endregion
 
         #endregion
 
@@ -66,6 +94,8 @@ namespace TSP.Presentation
         public MainWindow()
         {
             InitializeComponent();
+            int width = Console.WindowWidth + 40;
+            Console.SetWindowSize(width, Console.WindowHeight);
         }
 
 
@@ -74,37 +104,96 @@ namespace TSP.Presentation
 
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var ofd = new OpenFileDialog();
+                if (ofd.ShowDialog() == true)
+                {
+                    PC.LoadFilePoints(ofd.FileName);
+                }
+            }
+            catch(Exception ex)
+            {
+                handleException(ex);
+            }
+        }
 
+        private void btnLoadMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var ofd = new OpenFileDialog();
+                if (ofd.ShowDialog() == true)
+                {
+                    PC.LoadFileMap(ofd.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                handleException(ex);
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                var sfd = new SaveFileDialog();
+                if (sfd.ShowDialog() == true)
+                    PC.SaveFile(sfd.FileName);
+            }
+            catch (Exception ex)
+            {
+                handleException(ex);
+            }
         }
 
         private void btnRun_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                PC.Run();
+            }
+            catch (Exception ex)
+            {
+                handleException(ex);
+            }
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                PC.Stop();
+            }
+            catch (Exception ex)
+            {
+                handleException(ex);
+            }
         }
 
 
         #endregion
 
 
-        public Ellipse CreatePoint(TSP.Entities.Point p)
+
+        private void handleException(Exception ex)
         {
-            var e = new Ellipse();
-            e.Width = 5;
-            e.Height = 5;
-            e.StrokeThickness = 0;
-            e.Fill = Brushes.Red;
-            return e;
+            string msg = "Exception:\n";
+            Exception e = ex;
+            do
+            {
+                msg += e.Message;
+                if (e.InnerException != null)
+                {
+                    e = e.InnerException;
+                    msg += "\n\nInnerException:\n";
+                }
+                else
+                    e = null;
+            } while (e != null);
+            
+            MessageBox.Show(msg);
         }
-        
     }
 }

@@ -12,17 +12,26 @@ using TSP.DataAccess;
 
 namespace TSP.Business
 {
-    public class MapController
+    public class MapController : IMapController
     {
         private IWindowObserver m_winObs;
         private IMathHelper m_math = new MathHelper();
         private FileManager m_fileMgr;
         private Random m_rnd;
+        private bool m_stopProcess;
 
 
         #region Properties
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool StopProcess
+        {
+            get { return m_stopProcess; }
+            set { m_stopProcess = value; }
+        }
         /// <summary>
         /// Public accessor fuer den File Manager
         /// </summary>
@@ -83,7 +92,7 @@ namespace TSP.Business
         /// 
         /// </summary>
         /// <param name="etheration"></param>
-        public void Process(int etheration = 1)
+        public void OldProcess(int etheration = 1)
         {
             int count = 0;
             Map best = null;
@@ -141,7 +150,68 @@ namespace TSP.Business
                 }
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Process()
+        {
+            StopProcess = false;
+            int count = 0;
+            Map best = null;
+            Map bestCopy = null;
+            Map shortest = null;
+            while (StopProcess == false)
+            {
+                best = WinObs.BestMap;
+                bestCopy = best.Clone();
+                shortest = WinObs.ShortestMap;
 
+                count++;
+                int swapCount = 1;
+                WinObs.CurrentAge++;
+                Console.Write(EmptyLine + WinObs.CurrentLog.Text);
+
+                switch (count)
+                {
+                    case 10:
+                    case 20:
+                    case 30:
+                    case 40:
+                    case 60:
+                    case 70:
+                    case 80:
+                    case 90:
+                        swapCount = 2;
+                        break;
+                    case 50:
+                        swapCount = 4;
+                        count = 0;
+                        break;
+                    default:
+                        break;
+                }
+                for (int k = 0; k < swapCount; k++)
+                    singleSwap(bestCopy);
+
+
+                if (bestCopy.Fitness < best.Fitness)
+                {
+                    WinObs.NewBest(bestCopy);
+                    Console.WriteLine(EmptyLine + WinObs.CurrentLog.Text);
+                    count = 0;
+                }
+                else
+                {
+                    WinObs.CurrentLog.Fitness = bestCopy.Fitness;
+                    WinObs.CurrentLog.Distance = bestCopy.Distance;
+                    WinObs.CurrentLog.Intersections = bestCopy.GetIntersectionAmount();
+                }
+                if (bestCopy.Distance < WinObs.ShortestMap.Distance)
+                {
+                    WinObs.NewShortest(bestCopy);
+                }
+            }
+        }
 
         #region IO
 
@@ -152,22 +222,10 @@ namespace TSP.Business
         /// <param name="path"></param>
         public void ReadPoints(string path)
         {
-
-
             var points = FileMgr.LoadPoints(path);
             var lines = firstConnection(points);
 
             WinObs.LoadPoints(points, lines);
-
-
-            //CurrentMap.Generation = 1;
-            //CurrentMap.Logs.Add(new Log(CurrentMap.Generation, 0, CurrentMap.Fitness, CurrentMap.Distance));
-            //CurrentMap.Logs.First().Intersections = CurrentMap.GetIntersectionAmount();
-            //Console.WriteLine(EmptyLine + CurrentMap.Logs.First().Text);
-            //CurrentLog = new Log(CurrentMap.Generation + 1, 0, CurrentMap.Fitness, CurrentMap.Distance);
-            //CurrentLog.Intersections = CurrentMap.GetIntersectionAmount();
-            //BestMap = new Map(CurrentMap);
-
         }
         /// <summary>
         /// Speicher die momentan beste karte
@@ -268,9 +326,9 @@ namespace TSP.Business
             {
                 line2.B = line1.B;
                 line1.B = h;
-                h = line1.A;
-                line1.A = line2.A;
-                line2.A = h;
+                h = line2.A;
+                line2.A = line1.B;
+                line1.B = h;
             }
         }
 
@@ -286,21 +344,85 @@ namespace TSP.Business
         /// <returns></returns>
         private bool hasLoop(Map map)
         {
+            var lastLine = map.Lines.First();
             var startPoint = map.Lines.First().A;
             int counter = 0;
             var pointB = map.Lines.First().B;
             do
             {
                 counter++;
-                pointB = map.GetLineByPointA(pointB).B;
+                Line firstChoice = null;
+                Line secondChoice = null;
+                var next = map.GetLineByPointA(pointB);
+                Line nextLine = null;
+
+                if (next.Count == 0)
+                {
+                    next = map.GetLineByPointB(pointB);
+                    if (next.Count == 2)
+                    {
+                        firstChoice = next[0];
+                        secondChoice = next[1];
+                    }
+                    else
+                        throw new Exception("hasloop: line connection error. -> ByPointA == 0 /// ByPointB != 2");
+                }
+                else if (next.Count == 1)
+                {
+                    firstChoice = next[0];
+                    var second = map.GetLineByPointB(pointB);
+                    if (second != null && second.Count == 1)
+                    {
+                        secondChoice = second[0];
+                    }
+                    else
+                        throw new Exception("hasloop: line connection error. -> firstChoice is set /// ByPointB == null or !=1");
+                }
+                else if(next.Count == 2)
+                {
+                    firstChoice = next[0];
+                    secondChoice = next[1];
+                }
+                else
+                {
+                    throw new Exception("hasloop: line connection error. -> next.count = " + next.Count + " is not allowed to be grather than 2.");
+                }
+
+
+                if (firstChoice == lastLine)
+                    nextLine = secondChoice;
+                else if (secondChoice == lastLine)
+                    nextLine = firstChoice;
+                else
+                    throw new Exception("hasloop: line connection error. -> 'firstChoice' and 'secondChoice' are not equal to 'lastLine'");
+
+                lastLine = nextLine;
+
+                if (nextLine.A == pointB)
+                    pointB = nextLine.B;
+                else if (nextLine.B == pointB)
+                    pointB = nextLine.A;
+                else
+                    throw new Exception("hasloop: line connection error. -> the decided next line does not contain 'pointB'");
+
+
+
+                //var next = map.GetLineByPointA(pointB);
+                //if (next == null)
+                //    pointB = map.GetLineByPointB(pointB).A;
+                //else if (next.B == pointB)
+                //    pointB = map.GetLineByPointB(pointB).A;
+                //else
+                //    pointB = next.B;
+
                 if (counter == map.Lines.Count + 10)
                     throw new Exception("Something is wrong");
             } while (pointB != startPoint);
 
-            if (counter == map.Lines.Count)
-                return true;
-            else
+            if (counter == (map.Lines.Count - 1))
                 return false;
+            else
+                return true;
         }
 
     }

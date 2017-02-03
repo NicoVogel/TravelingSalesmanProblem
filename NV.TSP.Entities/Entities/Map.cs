@@ -81,9 +81,18 @@ namespace TSP.Entities
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public Line GetLineByPointA(Point p)
+        public List<Line> GetLineByPointA(Point p)
         {
-            return Lines.Where(x => x.A == p).FirstOrDefault();
+            return Lines.Where(x => x.A == p).ToList();
+        }
+        /// <summary>
+        /// Gebe die linie zurueck die den Punkt als A Punkt hat
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public List<Line> GetLineByPointB(Point p)
+        {
+            return Lines.Where(x => x.B == p).ToList();
         }
 
 
