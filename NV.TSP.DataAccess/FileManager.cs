@@ -123,7 +123,7 @@ namespace TSP.DataAccess
                             {
                                 points.Add(new Point(x, y)
                                 {
-                                    Index = i + 1
+                                    Index = points.Count
                                 });
                             }
                         }

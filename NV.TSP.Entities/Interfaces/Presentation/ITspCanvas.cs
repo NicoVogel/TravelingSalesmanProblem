@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Shapes;
 
 using TSP.Entities;
+using TSP.Entities.Controls;
 
 namespace TSP.Interfaces.Presentation
 {
@@ -13,16 +14,37 @@ namespace TSP.Interfaces.Presentation
     {
 
         #region Properties
-
+        
 
         /// <summary>
         /// Const -> the default scale value
         /// </summary>
         double DefaultScale { get; }
         /// <summary>
-        /// Const -> the default point size
+        /// Show the intersections
         /// </summary>
-        int DefaultPointSize { get; }
+        bool ShowIntersections { get; set; }
+        /// <summary>
+        /// The settings for points
+        /// </summary>
+        TspCancasPointSetting PointSettings { get; set; }
+        /// <summary>
+        /// The settings for intersections 
+        /// </summary>
+        TspCancasPointSetting IntersetionSettings { get; set; }
+        /// <summary>
+        /// The settings for lines
+        /// </summary>
+        TspCanvasLineSetting LineSettings { get; set; }
+        /// <summary>
+        /// The settings for the lines that have been replaced
+        /// </summary>
+        TspCanvasLineSetting OldLineSettings { get; set; }
+        /// <summary>
+        /// The settings for the lines that are new
+        /// </summary>
+        TspCanvasLineSetting NewLineSettings { get; set; }
+
 
 
         /// <summary>
@@ -40,22 +62,18 @@ namespace TSP.Interfaces.Presentation
         /// <para>by updating the scale all coordinates get updated as well</para>
         /// </summary>
         double Scale { get; set; }
-        /// <summary>
-        /// the diametar of a point
-        /// <para>by updating the size all points get updated as well</para>
-        /// </summary>
-        int PointSize { get; set; }
 
 
         #endregion
 
-
+        #region Point Methods
+        
 
         /// <summary>
-        /// Draw a point and create a relation
+        /// Draw points and create the relations.
         /// </summary>
-        /// <param name="p"></param>
-        void DrawPoint(Point p);
+        /// <param name="points"></param>
+        void DrawPoints(List<Point> points);
         /// <summary>
         /// Remove a point and the relation
         /// </summary>
@@ -65,11 +83,23 @@ namespace TSP.Interfaces.Presentation
         /// Remove all points from the canvas
         /// </summary>
         void RemoveAllPoints();
+
+
+        #endregion
+
+        #region Line Methods
+
+
         /// <summary>
-        /// Draw a line and create a relation
+        /// Draw lines and create the relations
         /// </summary>
-        /// <param name="l"></param>
-        void DrawLine(TSP.Entities.Line l);
+        /// <param name="lines"></param>
+        void DrawLines(List<TSP.Entities.Line> lines);
+        /// <summary>
+        /// Draw the new lines
+        /// </summary>
+        /// <param name="lines"></param>
+        void DrawNewLines(List<TSP.Entities.Line> lines);
         /// <summary>
         /// Remove a line and the relation
         /// </summary>
@@ -80,6 +110,42 @@ namespace TSP.Interfaces.Presentation
         /// </summary>
         void RemoveAllLines();
 
+
+        #endregion
+
+        #region Map Methods
+
+
+        /// <summary>
+        /// Draw a map
+        /// </summary>
+        void DrawMap(Map m);
+        /// <summary>
+        /// Remove a map
+        /// </summary>
+        void RemoveMap();
+
+
+        #endregion
+
+        #region Redraw Methods
+
+
+        /// <summary>
+        /// Redraw all points and lines
+        /// </summary>
+        void RedrawAll();
+        /// <summary>
+        /// Redraw all points
+        /// </summary>
+        void RedrawPoints();
+        /// <summary>
+        /// Redraw all lines
+        /// </summary>
+        void RedrawLines();
+
+
+        #endregion
 
     }
 }

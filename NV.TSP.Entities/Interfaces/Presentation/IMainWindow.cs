@@ -21,6 +21,9 @@ namespace TSP.Interfaces.Presentation
         /// get the checked value from the raidiobutton which is responsible for displaying the shortest map
         /// </summary>
         bool ShortestIsSelected { get; }
-
+        /// <summary>
+        /// this will enable or disable buttons on the ui. It is used to enable them when loading a map.
+        /// </summary>
+        bool ActivateActionsWithLoadedMap { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities.Math;
+using TSP.Entities.Controls;
 using TSP.Interfaces.Business;
 
 namespace TSP.Entities
@@ -85,6 +86,28 @@ namespace TSP.Entities
 
 
         /// <summary>
+        /// Return the interseption from this map
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static List<Point> GetInterseptions(this Map m)
+        {
+            var points = new List<Point>();
+
+            for (int i = 0; i < m.Lines.Count; i++)
+            {
+                for (int k = i + 1; k < m.Lines.Count; k++)
+                {
+                    var p = m_math.GetIntersection(m.Lines[i], m.Lines[k]);
+                    if (p != null)
+                        points.Add(p);
+                }
+            }
+            return points;
+        }
+
+
+        /// <summary>
         /// Erstellt die verbindung anhand von der entfernung der einzelnen punkten
         /// </summary>
         /// <param name="map"></param>
@@ -131,8 +154,38 @@ namespace TSP.Entities
             return map;
         }
 
+        
 
         #endregion
+
+        //#region Controls
+
+
+        ///// <summary>
+        ///// Get all intersection points
+        ///// </summary>
+        ///// <param name="tspCan"></param>
+        ///// <returns></returns>
+        //public static List<Point> GetIntersections(this TspCanvas tspCan)
+        //{
+        //    var points = new List<Point>();
+        //    var keys = tspCan.Lines.Keys.ToList();
+
+        //    for (int i = 0; i < keys.Count; i++)
+        //    {
+        //        for (int k = i + 1; k < keys.Count; k++)
+        //        {
+        //            var p = m_math.GetIntersection(keys[i], keys[k]);
+        //            if (p != null)
+        //                points.Add(p);
+        //        }
+        //    }
+        //    return points;
+        //}
+
+
+        //#endregion
+
 
     }
 }

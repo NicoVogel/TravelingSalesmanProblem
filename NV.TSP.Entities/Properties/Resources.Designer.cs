@@ -106,6 +106,15 @@ namespace TSP.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The read map point with the index &apos;{0}&apos; does not exist in the list of points. The index of the map is &apos;{1}&apos; and the indices are: {2}.
+        /// </summary>
+        internal static string ExReadMapFirstIndexDoesNotExist {
+            get {
+                return ResourceManager.GetString("ExReadMapFirstIndexDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The read map indices has a non numeric string as value. This error is located in the map with the index &apos;{0}&apos; at the read index with the index of &apos;{1}&apos; and the wrong text is &apos;{2}&apos;.
         /// </summary>
         internal static string ExReadMapIndiceNoNumberError {
@@ -120,6 +129,15 @@ namespace TSP.Entities.Properties {
         internal static string ExReadMapIndicesEmpty {
             get {
                 return ResourceManager.GetString("ExReadMapIndicesEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The read map point with the index &apos;{0}&apos; does not exits in the map indices list. The wrong index of the point in the map index list is &apos;{1}&apos; and the index of the map is &apos;{2}&apos;. The indices of the map are: {3}.
+        /// </summary>
+        internal static string ExReadMapPointIndexNotFound {
+            get {
+                return ResourceManager.GetString("ExReadMapPointIndexNotFound", resourceCulture);
             }
         }
         

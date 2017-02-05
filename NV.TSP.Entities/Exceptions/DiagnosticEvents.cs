@@ -46,6 +46,8 @@
         public const int ReadMapAgeNoNumberError = DataBase + 22;
         public const int ReadMapIndicesEmpty = DataBase + 23;
         public const int ReadMapIndiceNoNumberError = DataBase + 24;
+        public const int ReadMapFirstIndexDoesNotExist = DataBase + 25;
+        public const int ReadMapPointIndexNotFound = DataBase + 26;
 
 
         public const int LoadPointError = DataBase + 30;

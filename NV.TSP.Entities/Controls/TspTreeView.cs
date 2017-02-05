@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 
+using TSP.Entities;
 using TSP.Interfaces.Presentation;
 
-namespace TSP.Entities.Controls
+namespace TSP.Controls
 {
     public class TspTreeView : TreeView, ITspTreeView
     {
 
-
-
+        
 
 
 
@@ -24,7 +24,7 @@ namespace TSP.Entities.Controls
         }
 
 
-        public void AddGeneration(Map m)
+        public void AddGeneration(Map m, Log l)
         {
             throw new NotImplementedException();
         }

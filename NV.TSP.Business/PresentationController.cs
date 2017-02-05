@@ -15,7 +15,7 @@ using TSP.DataAccess;
 
 namespace TSP.Business
 {
-    
+
 
     public class PresentationController : IValueShare, IPresentationController
     {
@@ -30,6 +30,7 @@ namespace TSP.Business
         private IMainWindow m_main;
         private IFileManager m_fileMgr;
         private Thread m_thread;
+        private bool m_unsavedMaps;
 
 
         #region Properties
@@ -112,7 +113,7 @@ namespace TSP.Business
 
         #region PC Interface Properties
 
-        
+
         /// <summary>
         /// get the extesion for the map files
         /// </summary>
@@ -121,10 +122,22 @@ namespace TSP.Business
         /// get the extsion for point files
         /// </summary>
         public string PointExtension { get { return FileMgr.PointExtension; } }
+        /// <summary>
+        /// if threads are running it returns true
+        /// </summary>
+        public bool ThreadsAreRunning { get { return m_thread != null && m_thread.IsAlive; } }
+        /// <summary>
+        /// This indidates if there are unsaved maps
+        /// </summary>
+        public bool HasUnsavedInformation
+        {
+            get { return m_unsavedMaps; }
+            private set { m_unsavedMaps = value; }
+        }
 
 
         #endregion
-        
+
         #region Window Observer Interface Properties
 
 
@@ -141,8 +154,8 @@ namespace TSP.Business
         /// </summary>
         public int CurrentAge
         {
-            get { return m_curAge; }
-            set { m_curAge = value; }
+            get { return CurrentLog.Age; }
+            set { CurrentLog.Age = value; }
         }
         /// <summary>
         /// public accessor
@@ -191,16 +204,19 @@ namespace TSP.Business
             CurrentLog.Fitness = m.Fitness;
             CurrentLog.Intersections = m.GetIntersectionAmount();
             CurrentLog.Age = CurrentAge;
-            Logs.Add(CurrentLog);
 
             // override the generation number and clone the new best map
             m.Generation = CurrentLog.Generation;
+            m.DefineVersionDifferences(BestMap);
             BestMap = m.Clone();
             Maps.Add(BestMap);
 
-            // create the new log
-            CurrentLog = new Log(m.Generation + 1, 0, m.Fitness, m.Distance);
-            CurrentLog.Intersections = m.GetIntersectionAmount();
+            // reset the values for the next log
+            Console.WriteLine(CurrentLog.Text);
+            CurrentLog = CurrentLog.Clone();
+            CurrentLog.Generation = m.Generation + 1;
+            CurrentLog.Age = 0;
+            Logs.Add(CurrentLog);
 
             // set the age to 0
             CurrentAge = CurrentLog.Age;
@@ -209,6 +225,8 @@ namespace TSP.Business
             // draw
             if (MainWind.BestIsSelected)
                 drawLines();
+
+            HasUnsavedInformation = true;
         }
         /// <summary>
         /// Set the new shortest map
@@ -217,47 +235,50 @@ namespace TSP.Business
         public void NewShortest(Map m)
         {
             ShortestMap = m.Clone();
-            Maps.Add(ShortestMap);
 
             // draw
             if (MainWind.ShortestIsSelected)
                 drawLines();
+
+            HasUnsavedInformation = true;
         }
 
 
         #endregion
 
-
-
         #region PC Interface Methods
 
 
         /// <summary>
-        /// 
+        /// Load a file which conatins points
         /// </summary>
         /// <param name="path"></param>
         public void LoadFilePoints(string path)
         {
+            ClearCurrentState();
+
             Points = FileMgr.LoadPoints(path);
             BestMap = new Map().FirstConnection(Points);
             ShortestMap = BestMap.Clone();
+
             CurrentLog = new Log(BestMap.Generation + 1, 0, BestMap.Fitness, BestMap.Distance);
+            Logs.Add(new Log(BestMap.Generation, 0, BestMap.Fitness, BestMap.Distance));
             Logs.Add(CurrentLog);
             CurrentAge = 0;
             Maps.Add(BestMap);
-            
-            Console.Clear();
 
-            // draw
-            drawPoints();
-            drawLines();
+            Console.Clear();
+            Console.WriteLine(Logs.First().Text);
+            loadCalls();
         }
         /// <summary>
-        /// 
+        /// Load a file which contains a map
         /// </summary>
         /// <param name="path"></param>
         public void LoadFileMap(string path)
         {
+            ClearCurrentState();
+
             var read = FileMgr.LoadFile(path);
             Points = read.GetPoints();
             Maps = read.GetMaps();
@@ -271,13 +292,11 @@ namespace TSP.Business
             CurrentAge = 0;
 
             Console.Clear();
-
-            // draw
-            drawPoints();
-            drawLines();
+            Console.WriteLine(Logs.Last().Text);
+            loadCalls();
         }
         /// <summary>
-        /// 
+        /// Save a file at the given path
         /// </summary>
         /// <param name="path"></param>
         public void SaveFile(string path)
@@ -285,9 +304,11 @@ namespace TSP.Business
             var mf = new MapFile();
             mf.Fill(Maps, Logs, Points);
             FileMgr.SaveFile(path, mf);
+
+            HasUnsavedInformation = false;
         }
         /// <summary>
-        /// 
+        /// start the process to solve the tsp problem
         /// </summary>
         public void Run()
         {
@@ -300,7 +321,7 @@ namespace TSP.Business
             }
         }
         /// <summary>
-        /// 
+        /// stop the process to solve the tsp problem
         /// </summary>
         public void Stop()
         {
@@ -309,7 +330,23 @@ namespace TSP.Business
             else
                 throw new Exception("Der Prozess läuft gerade nicht");
         }
-
+        /// <summary>
+        /// clear the current state. Maps, Logs, Point will be cleared
+        /// </summary>
+        public void ClearCurrentState()
+        {
+            Maps.Clear();
+            Logs.Clear();
+            Points.Clear();
+            HasUnsavedInformation = false;
+        }
+        /// <summary>
+        /// Redraw the current map
+        /// </summary>
+        public void Redraw()
+        {
+            drawLines();
+        }
 
         #endregion
 
@@ -319,34 +356,36 @@ namespace TSP.Business
             {
                 // clear the old points
                 MainWind.TspCan.RemoveAllPoints();
-
-                // set the new points
-                foreach (var p in Points)
-                {
-                    MainWind.TspCan.DrawPoint(p);
-                }
+                MainWind.TspCan.DrawPoints(Points);
             }
         }
 
         private void drawLines()
         {
-            List<Line> lines = null;
+            Map m = null;
             if (MainWind.BestIsSelected)
-                lines = BestMap.Lines;
+                m = BestMap;
             else if (MainWind.ShortestIsSelected)
-                lines = ShortestMap.Lines;
+                m = ShortestMap;
 
-            if (lines != null && lines.Count > 0)
+            if (m != null)
             {
-                // clear the old lines
-                MainWind.TspCan.RemoveAllLines();
+                if (m.CurLines.Count == 0)
+                    m.CurLines = m.Lines;
 
-                // set the new line
-                foreach (var l in lines)
-                {
-                    MainWind.TspCan.DrawLine(l);
-                }
+                MainWind.TspCan.RemoveMap();
+                MainWind.TspCan.DrawMap(m);
             }
+        }
+
+        private void loadCalls()
+        {
+            MainWind.ActivateActionsWithLoadedMap = true;
+            // draw
+            drawPoints();
+            drawLines();
+
+            HasUnsavedInformation = false;
         }
     }
 }

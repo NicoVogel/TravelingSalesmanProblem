@@ -66,8 +66,11 @@ namespace TSP.Entities.Data
 
             foreach (var map in mapsOrderd)
             {
-                var log = logs.Where(x => x.Generation == map.Generation).FirstOrDefault();
-                m_maps.Add(getMapAndLogAsString(map, log));
+                if (m_maps.Count - 1 != map.Generation)
+                {
+                    var log = logs.Where(x => x.Generation == map.Generation).FirstOrDefault();
+                    m_maps.Add(getMapAndLogAsString(map, log));
+                }
             }
             foreach (var point in pointsOrderd)
             {
@@ -144,7 +147,7 @@ namespace TSP.Entities.Data
 
                             points.Add(new Point()
                             {
-                                Index = i + 1,
+                                Index = points.Count,
                                 X = x,
                                 Y = y
                             });
@@ -186,18 +189,19 @@ namespace TSP.Entities.Data
                 var lineClone = new List<Line>(map.Lines);
                 var curLine = lineClone.First();
                 var curPoint = curLine.B;
+                var firstPointIndex = curLine.A.Index;
 
                 if (log == null)
-                    storeMap.Append("0" + MapAgeSeperator);
+                    storeMap.Append("0" + MapAgeSeperator.ToString());
                 else
-                    storeMap.Append(log.Age + MapAgeSeperator);
-                storeMap.Append(curLine.A.Index + MapIndexSeperator + curLine.B.Index);
+                    storeMap.Append(log.Age + MapAgeSeperator.ToString());
+
+                storeMap.Append(curLine.A.Index + MapIndexSeperator.ToString() + curLine.B.Index);
                 lineClone.Remove(curLine);
 
 
                 while (lineClone.Count != 0)
                 {
-                    storeMap.Append(MapIndexSeperator);
                     var nextlines = map.GetLineByPoint(curPoint);
 
 
@@ -216,7 +220,8 @@ namespace TSP.Entities.Data
 
                         // remove the current point
                         lineClone.Remove(curLine);
-                        storeMap.Append(curPoint.Index);
+                        if (curPoint.Index != firstPointIndex)
+                            storeMap.Append(MapIndexSeperator.ToString() + curPoint.Index);
 
 
                     }
@@ -280,10 +285,14 @@ namespace TSP.Entities.Data
                         var points = GetPoints();
                         int indexA = indices.First();
                         var pointA = points.Where(x => x.Index == indexA).FirstOrDefault();
+                        if (pointA == null)
+                            throw new TspDataException(DiagnosticEvents.ReadMapFirstIndexDoesNotExist, String.Format(Resources.ExReadMapFirstIndexDoesNotExist, indexA, index, logMap[1]));
                         for (int i = 1; i < indices.Count; i++)
                         {
                             int indexB = indices[i];
                             var pointB = points.Where(x => x.Index == indexB).FirstOrDefault();
+                            if (pointB == null)
+                                throw new TspDataException(DiagnosticEvents.ReadMapPointIndexNotFound, String.Format(Resources.ExReadMapPointIndexNotFound, indexB, i, index, logMap[1]));
                             map.Lines.Add(new Line(pointA, pointB));
                             indexA = indexB;
                             pointA = pointB;
@@ -294,7 +303,7 @@ namespace TSP.Entities.Data
                         log.Distance = map.Distance;
                         log.Fitness = map.Fitness;
                         log.Generation = map.Generation;
-                        log.Intersections = map.Intersection;
+                        log.Intersections = map.IntersectionCount;
                     }
                     else
                         throw new TspDataException(DiagnosticEvents.ReadMapIndicesEmpty, String.Format(Resources.ExReadMapIndicesEmpty, index, logMap[1]));

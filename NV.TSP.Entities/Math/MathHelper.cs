@@ -18,7 +18,7 @@ namespace TSP.Entities.Math
         private double m_distanceMultiplicator = 60;
 
         #region Const
-        
+
 
         /// <summary>
         /// Diese Zahl wird mit der Schnitstellen anzahl multipliziert um einen groesseren einfluss auf die Fitness zu haben.
@@ -137,6 +137,54 @@ namespace TSP.Entities.Math
         /// <returns></returns>
         public bool HasIntersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
+            return GetIntersection(x1, y1, x2, y2, x3, y3, x4, y4) != null;
+        }
+        /// <summary>
+        /// Get the intersection point. It is null if there is no intersection
+        /// </summary>
+        /// <param name="ab"></param>
+        /// <param name="cd"></param>
+        /// <returns></returns>
+        public Point GetIntersection(Line ab, Line cd)
+        {
+            return GetIntersection(ab.A, ab.B, cd.A, cd.B);
+        }
+        /// <summary>
+        /// Get the intersection point. It is null if there is no intersection
+        /// <para></para>
+        /// Linie 1 -> AB; 
+        /// Linie 2 -> CD
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="c"></param>
+        /// <param name="d"></param>
+        /// <returns></returns>
+        public Point GetIntersection(Point a, Point b, Point c, Point d)
+        {
+            return GetIntersection(a.X, a.Y, b.X, b.Y, c.X, c.Y, d.X, d.Y);
+        }
+        /// <summary>
+        /// Get the intersection point. It is null if there is no intersection
+        /// <para>A(x1,y1);
+        /// B(x2,y2);
+        /// C(x3,y3);
+        /// D(x4,y4)
+        /// </para>
+        /// Linie 1 -> AB;
+        /// Linie 2 -> CD
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        /// <param name="x3"></param>
+        /// <param name="y3"></param>
+        /// <param name="x4"></param>
+        /// <param name="y4"></param>
+        /// <returns></returns>
+        public Point GetIntersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+        {
             // A = (y4 - y3)  
             // B = (x4 - x3)
             //
@@ -150,7 +198,6 @@ namespace TSP.Entities.Math
             // Koordinaten von dem schnittpunkt
             // x = x1 + t * (x2 - x1)
             // y = y1 + t * (y2 - y2)
-
             try
             {
                 int A = y4 - y3;
@@ -163,7 +210,7 @@ namespace TSP.Entities.Math
                 double denominator = -(A * x2) + Ax1 + (B * y2) - By1;
 
                 if (denominator == 0)
-                    return false;
+                    return null;
 
                 double t = nominator / denominator;
                 double x = x1 + t * (x2 - x1);
@@ -173,7 +220,7 @@ namespace TSP.Entities.Math
                 int Bx = System.Math.Max(x1, x2);  // linie 1. der groessere x wert
                 int Ay = System.Math.Min(y1, y2);  // linie 1. der kleinere y wert
                 int By = System.Math.Max(y1, y2);  // linie 1. der groessere y wert
-                    
+
                 int Cx = System.Math.Min(x3, x4);  // linie 2. der kleinere x wert
                 int Dx = System.Math.Max(x3, x4);  // linie 2. der groessere x wert
                 int Cy = System.Math.Min(y3, y4);  // linie 2. der kleinere y wert
@@ -183,13 +230,13 @@ namespace TSP.Entities.Math
                     x > Cx && x < Dx &&   // zwischen Cx und Dx
                     y > Ay && y < By &&   // zwischen Ay und By
                     y > Cy && y < Dy)     // zwischen Cy und Dy
-                    return true;
+                    return new Point((int)x, (int)y);
                 else
-                    return false;
+                    return null;
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
         }
 

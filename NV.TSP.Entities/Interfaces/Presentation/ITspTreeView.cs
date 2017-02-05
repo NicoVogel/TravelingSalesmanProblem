@@ -13,7 +13,7 @@ namespace TSP.Interfaces.Presentation
 
 
 
-        void AddGeneration(Map m);
+        void AddGeneration(Map m, Log l);
 
         void RemoveGeneration(Map m);
 

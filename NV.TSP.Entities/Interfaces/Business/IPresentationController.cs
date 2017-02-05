@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using TSP.Entities.Enums;
+
 namespace TSP.Interfaces.Business
 {
     public interface IPresentationController
@@ -17,6 +19,15 @@ namespace TSP.Interfaces.Business
         /// get the extsion for point files
         /// </summary>
         string PointExtension { get; }
+        /// <summary>
+        /// if threads are running it returns true
+        /// </summary>
+        bool ThreadsAreRunning { get; }
+        /// <summary>
+        /// This indidates if there are unsaved maps
+        /// </summary>
+        bool HasUnsavedInformation { get; }
+        
 
         /// <summary>
         /// Load a file which conatins points
@@ -34,11 +45,21 @@ namespace TSP.Interfaces.Business
         /// <param name="path"></param>
         void SaveFile(string path);
         /// <summary>
-        /// the method for the endless run to progress
+        /// start the process to solve the tsp problem
         /// </summary>
         void Run();
-
+        /// <summary>
+        /// stop the process to solve the tsp problem
+        /// </summary>
         void Stop();
+        /// <summary>
+        /// clear the current state. Maps, Logs, Point will be cleared
+        /// </summary>
+        void ClearCurrentState();
+        /// <summary>
+        /// Redraw the current map
+        /// </summary>
+        void Redraw();
 
     }
 }

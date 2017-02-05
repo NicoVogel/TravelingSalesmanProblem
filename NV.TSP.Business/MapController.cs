@@ -12,7 +12,7 @@ using TSP.DataAccess;
 
 namespace TSP.Business
 {
-    public class MapController : IMapController
+    class MapController : IMapController
     {
         private IValueShare m_winObs;
         private Random m_rnd;
@@ -106,8 +106,8 @@ namespace TSP.Business
 
                 if (bestCopy.Fitness < best.Fitness)
                 {
+                    Console.Write(EmptyLine);
                     WinObs.NewBest(bestCopy);
-                    Console.WriteLine(EmptyLine + WinObs.CurrentLog.Text);
                     count = 0;
                 }
                 else

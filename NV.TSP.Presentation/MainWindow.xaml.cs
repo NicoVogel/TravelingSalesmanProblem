@@ -27,7 +27,7 @@ namespace TSP.Presentation
     public partial class MainWindow : Window, IMainWindow
     {
         private IPresentationController m_pc;
-
+        private bool m_actionWithMap;
 
         #region Properties
 
@@ -65,7 +65,8 @@ namespace TSP.Presentation
             get
             {
                 bool val = false;
-                this.Dispatcher.Invoke(()=>{
+                this.Dispatcher.Invoke(() =>
+                {
                     val = this.rdiBest.IsChecked == null ? false : (bool)this.rdiBest.IsChecked;
                 });
                 return val;
@@ -79,13 +80,32 @@ namespace TSP.Presentation
             get
             {
                 bool val = false;
-                this.Dispatcher.Invoke(() => {
+                this.Dispatcher.Invoke(() =>
+                {
                     val = this.rdiShort.IsChecked == null ? false : (bool)this.rdiShort.IsChecked; ;
                 });
                 return val;
             }
         }
 
+        /// <summary>
+        /// this will enable or disable buttons on the ui. It is used to enable them when loading a map.
+        /// </summary>
+        public bool ActivateActionsWithLoadedMap
+        {
+            get { return m_actionWithMap; }
+            set
+            {
+                m_actionWithMap = value;
+                this.rdiShort.IsEnabled = value;
+                this.rdiBest.IsEnabled = value;
+                this.btnRun.IsEnabled = value;
+                this.btnStop.IsEnabled = value;
+                this.btnSave.IsEnabled = value;
+                this.btnClear.IsEnabled = value;
+                this.chkIntersection.IsEnabled = value;
+            }
+        }
 
         #endregion
 
@@ -99,6 +119,7 @@ namespace TSP.Presentation
             Console.SetWindowSize(width, Console.WindowHeight);
 
             this.rdiShort.IsChecked = true;
+            ActivateActionsWithLoadedMap = false;
         }
 
 
@@ -116,7 +137,7 @@ namespace TSP.Presentation
                     PC.LoadFilePoints(ofd.FileName);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 handleException(ex);
             }
@@ -177,18 +198,49 @@ namespace TSP.Presentation
                 handleException(ex);
             }
         }
-        
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+
+        private void btnExit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void btnClearMap(object sender, RoutedEventArgs e)
+        {
+            if (PC.HasUnsavedInformation == false ||
+                PC.HasUnsavedInformation && MessageBox.Show(
+                "There are unsaved results from processes. If you clear the map these results will be lost. Do you want to clear the map?",
+                "Confirmation",
+                MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                TspCan.RemoveAllLines();
+                TspCan.RemoveAllPoints();
+                PC.ClearCurrentState();
+                ActivateActionsWithLoadedMap = false;
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // check if process is still running
-            // ask for saving befor closing
-        }
+            if (PC.ThreadsAreRunning && MessageBox.Show(
+                "There are processes running. The current status will not be saved. Do you want to close the application?",
+                "Confirmation",
+                MessageBoxButton.YesNo) == MessageBoxResult.No)
+                e.Cancel = true;
 
+            // check if there are unsaved maps
+            if (PC.HasUnsavedInformation && MessageBox.Show(
+                "There are unsaved results from processes. If you close the application these results will be lost. Do you want to close the application?",
+                "Confirmation",
+                MessageBoxButton.YesNo) == MessageBoxResult.No)
+                e.Cancel = true;
+        }
+        
+        private void chkIntersection_Changed(object sender, RoutedEventArgs e)
+        {
+            TspCan.ShowIntersections = (bool)(sender as CheckBox).IsChecked;
+            PC.Redraw();
+        }
 
         #endregion
 
@@ -209,7 +261,7 @@ namespace TSP.Presentation
                 else
                     e = null;
             } while (e != null);
-            
+
             MessageBox.Show(msg);
         }
     }

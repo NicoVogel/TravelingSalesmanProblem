@@ -132,11 +132,17 @@
   <data name="ExReadMapAgeSturctureError" xml:space="preserve">
     <value>The read map has the wrong structure. It is supposed to have two parts seperated by '{0}'. The wrong index is '{1}' with the message:\n{2}</value>
   </data>
+  <data name="ExReadMapFirstIndexDoesNotExist" xml:space="preserve">
+    <value>The read map point with the index '{0}' does not exist in the list of points. The index of the map is '{1}' and the indices are: {2}</value>
+  </data>
   <data name="ExReadMapIndiceNoNumberError" xml:space="preserve">
     <value>The read map indices has a non numeric string as value. This error is located in the map with the index '{0}' at the read index with the index of '{1}' and the wrong text is '{2}'</value>
   </data>
   <data name="ExReadMapIndicesEmpty" xml:space="preserve">
     <value>The read map has no not enougth indices of points. There need to be at least 2 indices. The index of the map is '{0}' and the text is '{1}'</value>
+  </data>
+  <data name="ExReadMapPointIndexNotFound" xml:space="preserve">
+    <value>The read map point with the index '{0}' does not exits in the map indices list. The wrong index of the point in the map index list is '{1}' and the index of the map is '{2}'. The indices of the map are: {3}</value>
   </data>
   <data name="ExReadMapStringEmpty" xml:space="preserve">
     <value>The read map has an empty string, but it need values to create a map or log. The index is '{0}'</value>

@@ -10,17 +10,19 @@
         <Controls:TspCanvas x:Name="canvas" HorizontalAlignment="Left" Height="296" Margin="143,24,0,-1" VerticalAlignment="Top" Width="374"/>
         <Button x:Name="btnRun" Content="Run" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="90" Click="btnRun_Click" IsEnabled="False"/>
         <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="90" Click="btnStop_Click" IsEnabled="False"/>
-        <TreeView x:Name="tvwContent" HorizontalAlignment="Left" Margin="10,115,0,10" Width="128"/>
+        <TreeView x:Name="tvwContent" HorizontalAlignment="Left" Margin="10,145,0,10" Width="128"/>
         <RadioButton x:Name="rdiBest" Content="Show Best" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top" Width="90"/>
         <RadioButton x:Name="rdiShort" Content="Show Short" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Width="90" />
         <Menu x:Name="menu" Height="20" VerticalAlignment="Top">
             <MenuItem Header="File">
                 <MenuItem Header="Load Points" Click="btnLoad_Click"/>
                 <MenuItem Header="Load Map" Click="btnLoadMap_Click"/>
-                <MenuItem Header="Save Map" Click="btnSave_Click"/>
-                <MenuItem Header="Exit" Click="MenuItem_Click"/>
+                <MenuItem x:Name="btnSave" Header="Save Map" Click="btnSave_Click"/>
+                <MenuItem x:Name="btnClear" Header="Clear Map" Click="btnClearMap"/>
+                <MenuItem Header="Exit" Click="btnExit_Click"/>
             </MenuItem>
         </Menu>
+        <CheckBox x:Name="chkIntersection" Content="Show Intersections" HorizontalAlignment="Left" Margin="10,115,0,0" Height="15" VerticalAlignment="Top" Checked="chkIntersection_Changed" Unchecked="chkIntersection_Changed"/>
 
 
     </Grid>

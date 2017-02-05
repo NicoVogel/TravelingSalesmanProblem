@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TSP.DataAccess</RootNamespace>
     <AssemblyName>TSP.DataAccess</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FileParser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dll\FileParser.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,10 +54,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\NV.FileParser\FileParser\FileParser.csproj">
-      <Project>{ece2e8c9-906f-4f00-ad43-110ac1cb841f}</Project>
-      <Name>FileParser</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NV.TSP.Entities\NV.TSP.Entities.csproj">
       <Project>{fd293232-c293-4499-b678-c4c560fef17a}</Project>
       <Name>NV.TSP.Entities</Name>
