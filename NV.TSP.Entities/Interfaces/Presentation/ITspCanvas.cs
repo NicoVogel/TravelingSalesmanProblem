@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Shapes;
 
 using TSP.Entities;
-using TSP.Entities.Controls;
+using TSP.Controls;
 
 namespace TSP.Interfaces.Presentation
 {

@@ -10,13 +10,18 @@ namespace TSP.Interfaces.Presentation
 {
     public interface ITspTreeView
     {
+        
+        event SelectedChanged SelectedCheckBoxChanged;
 
+        void AddGeneration(Log log);
 
-
-        void AddGeneration(Map m, Log l);
-
-        void RemoveGeneration(Map m);
+        void AddGenerations(List<Log> logs);
+        void RemoveGeneration(int generation);
 
         void RemoveAllGenerations();
+
+        void UncheckAllCheckboxes();
     }
+
+    public delegate void SelectedChanged(object sender, int generation);
 }

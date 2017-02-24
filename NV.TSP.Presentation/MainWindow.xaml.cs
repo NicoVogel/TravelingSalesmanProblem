@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using TSP.Business;
-using TSP.Entities.Controls;
+using TSP.Controls.TspTreeView;
 using TSP.Interfaces.Business;
 using TSP.Interfaces.Presentation;
 
@@ -120,6 +120,10 @@ namespace TSP.Presentation
 
             this.rdiShort.IsChecked = true;
             ActivateActionsWithLoadedMap = false;
+
+            var ctx = new TreeViewStructureViewModel();
+            this.DataContext = ctx;
+            PC.TreeView = ctx;
         }
 
 

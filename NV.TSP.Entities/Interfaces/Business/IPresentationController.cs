@@ -5,11 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities.Enums;
+using TSP.Interfaces.Presentation;
 
 namespace TSP.Interfaces.Business
 {
     public interface IPresentationController
     {
+
+        ITspTreeView TreeView { get; set; }
+
 
         /// <summary>
         /// get the extesion for the map files

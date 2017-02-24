@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,7 @@ using TSP.Interfaces.Business;
 using TSP.Interfaces.Presentation;
 using TSP.Interfaces.Data;
 using TSP.DataAccess;
-
+using System.Collections.ObjectModel;
 
 namespace TSP.Business
 {
@@ -23,17 +24,25 @@ namespace TSP.Business
         private Map m_best;
         private Map m_shortest;
         private List<Point> m_points;
-        private List<Log> m_logs;
+        private ObservableCollection<Log> m_logs;
         private Log m_log;
-        private int m_curAge;
         private IMapController m_mc;
         private IMainWindow m_main;
         private IFileManager m_fileMgr;
+        private ITspTreeView m_treeView;
         private Thread m_thread;
         private bool m_unsavedMaps;
 
 
         #region Properties
+
+
+        public ITspTreeView TreeView
+        {
+            get { return m_treeView; }
+            set { m_treeView = value; }
+        }
+
 
 
         /// <summary>
@@ -86,16 +95,20 @@ namespace TSP.Business
         /// <summary>
         /// public accessor
         /// </summary>
-        public List<Log> Logs
+        public ObservableCollection<Log> Logs
         {
             get
             {
                 if (m_logs == null)
-                    m_logs = new List<Log>();
+                {
+                    m_logs = new ObservableCollection<Log>();
+                    m_logs.CollectionChanged += Logs_CollectionChanged;
+                }
                 return m_logs;
             }
             private set { m_logs = value; }
         }
+
         /// <summary>
         /// public accessor
         /// </summary>
@@ -211,6 +224,8 @@ namespace TSP.Business
             BestMap = m.Clone();
             Maps.Add(BestMap);
 
+            this.TreeView.AddGeneration(CurrentLog);
+
             // reset the values for the next log
             Console.WriteLine(CurrentLog.Text);
             CurrentLog = CurrentLog.Clone();
@@ -282,7 +297,11 @@ namespace TSP.Business
             var read = FileMgr.LoadFile(path);
             Points = read.GetPoints();
             Maps = read.GetMaps();
-            Logs = read.GetLogs();
+            foreach (var log in read.GetLogs())
+            {
+                Logs.Add(log);
+            }
+            
 
             BestMap = Maps.OrderByDescending(x => x.Fitness).FirstOrDefault();
             ShortestMap = Maps.OrderByDescending(x => x.Distance).FirstOrDefault();
@@ -302,7 +321,7 @@ namespace TSP.Business
         public void SaveFile(string path)
         {
             var mf = new MapFile();
-            mf.Fill(Maps, Logs, Points);
+            mf.Fill(Maps, Logs.ToList(), Points);
             FileMgr.SaveFile(path, mf);
 
             HasUnsavedInformation = false;
@@ -387,5 +406,46 @@ namespace TSP.Business
 
             HasUnsavedInformation = false;
         }
+
+
+
+
+        /// <summary>
+        /// updates the tree view
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Logs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // ignore if the treeview is not set
+            if (TreeView == null)
+                return;
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                // add the added item to the treeview
+                var logObject = e.NewItems == null ? null : e.NewItems.Count == 0 ? null : e.NewItems[0];
+                if (logObject is Log)
+                    TreeView.AddGeneration(logObject as Log);
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                // remove the removed item to the treeview
+                var logObject = e.OldItems == null ? null : e.OldItems.Count == 0 ? null : e.OldItems[0];
+                if (logObject is Log)
+                    TreeView.RemoveGeneration((logObject as Log).Generation);
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Move ||
+                e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                // rebuild the tree view
+                TreeView.RemoveAllGenerations();
+                TreeView.AddGenerations(Logs.ToList());
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Reset)
+                // clear tree view
+                TreeView.RemoveAllGenerations();
+        }
+
     }
 }

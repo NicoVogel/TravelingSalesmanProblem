@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using TSP.Entities.Math;
-using TSP.Entities.Controls;
+using TSP.Controls;
 using TSP.Interfaces.Business;
 
 namespace TSP.Entities

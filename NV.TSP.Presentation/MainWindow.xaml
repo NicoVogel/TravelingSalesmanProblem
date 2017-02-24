@@ -1,18 +1,31 @@
-﻿<Window xmlns:Controls="clr-namespace:TSP.Entities.Controls;assembly=TSP.Entities"  x:Class="TSP.Presentation.MainWindow"
+﻿<Window x:Class="TSP.Presentation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TSP.Presentation"
+        xmlns:Controls="clr-namespace:TSP.Controls;assembly=TSP.Entities"  
+        xmlns:BusObj="clr-namespace:TSP.Controls.TspTreeView;assembly=TSP.Entities"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Closing="Window_Closing">
-    <Grid>
-        <Controls:TspCanvas x:Name="canvas" HorizontalAlignment="Left" Height="296" Margin="143,24,0,-1" VerticalAlignment="Top" Width="374"/>
-        <Button x:Name="btnRun" Content="Run" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="90" Click="btnRun_Click" IsEnabled="False"/>
-        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="90" Click="btnStop_Click" IsEnabled="False"/>
-        <TreeView x:Name="tvwContent" HorizontalAlignment="Left" Margin="10,145,0,10" Width="128"/>
-        <RadioButton x:Name="rdiBest" Content="Show Best" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top" Width="90"/>
-        <RadioButton x:Name="rdiShort" Content="Show Short" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Width="90" />
+        Title="MainWindow" 
+        Height="350" 
+        Width="525" 
+        Closing="Window_Closing">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="b2v" />
+    </Window.Resources>
+    
+    <Application xmlns:vm="clr-namespace:TSP.Controls.TspTreeView;assembly=TSP.Entities" >
+        <Application.Resources>
+            <ResourceDictionary>
+                <vm:ViewModelLocator xmlns:vm="clr-namespace:TSP.Presentation" x:Key="Locator" />
+            </ResourceDictionary>
+        </Application.Resources>
+    </Application>
+    
+    <StackPanel>
+
         <Menu x:Name="menu" Height="20" VerticalAlignment="Top">
             <MenuItem Header="File">
                 <MenuItem Header="Load Points" Click="btnLoad_Click"/>
@@ -22,8 +35,72 @@
                 <MenuItem Header="Exit" Click="btnExit_Click"/>
             </MenuItem>
         </Menu>
-        <CheckBox x:Name="chkIntersection" Content="Show Intersections" HorizontalAlignment="Left" Margin="10,115,0,0" Height="15" VerticalAlignment="Top" Checked="chkIntersection_Changed" Unchecked="chkIntersection_Changed"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+
+                <Border Padding="10">
+                    <StackPanel>
+                        <Button x:Name="btnRun" Content="Run" Width="90" HorizontalAlignment="Left" Click="btnRun_Click"/>
+                        <Button x:Name="btnStop" Content="Stop " Width="90" HorizontalAlignment="Left" Click="btnStop_Click"/>
+                        <RadioButton x:Name="rdiBest" Content="Show Best" Width="90" HorizontalAlignment="Left" />
+                        <RadioButton x:Name="rdiShort" Content="Show Short" Width="90" HorizontalAlignment="Left" />
+                        <CheckBox x:Name="chkIntersection" Content="Show Intersections" Height="15" HorizontalAlignment="Left"  Checked="chkIntersection_Changed" Unchecked="chkIntersection_Changed"/>
+                    </StackPanel>
+                </Border>
 
 
-    </Grid>
+
+
+                <TreeView x:Name="FolderView" ItemsSource="{Binding Items, Source={StaticResource BusObj}}">
+                    <!--
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                -->
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children, Source=BusObj}">
+                            <!--
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Visibility="{Binding ShowCheckbox, Converter={StaticResource b2v} }"/>
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Name}"/>
+                            <TextBlock VerticalAlignment="Center" TextAlignment="Right" Text="{Binding Value}" />
+                        </StackPanel>
+                        -->
+                            <StackPanel Orientation="Horizontal" Margin="5 1 0 1">
+                                <CheckBox Tag="{Binding Value, Source=BusObj}" 
+                                      VerticalAlignment="Center" 
+                                      Visibility="{Binding ShowCheckbox, Converter={StaticResource b2v}}" 
+                                      Margin="0 0 10 0"
+                                      IsChecked="{Binding IsChecked, Mode=TwoWay, Source=BusObj}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Checked">
+                                            <i:InvokeCommandAction Command="{Binding OnCheckedCommand, Source=BusObj}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </CheckBox>
+                                <TextBlock VerticalAlignment="Center" TextAlignment="Left" Text="{Binding Name, Source=BusObj}"/>
+                                <TextBlock VerticalAlignment="Center" TextAlignment="Right" Text="{Binding Value, Source=BusObj}" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </StackPanel>
+
+            <Controls:TspCanvas Grid.Column="1" x:Name="canvas" Height="300" Width="300" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+
+
+
+
+
+        </Grid>
+
+
+    </StackPanel>
 </Window>
